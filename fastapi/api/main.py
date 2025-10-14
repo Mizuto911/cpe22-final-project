@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from .database import Base, engine
-from .routers import auth, measurements
+from .routers import auth, measurements, fatigue_data
 
 app = FastAPI()
 Base.metadata.create_all(bind=engine)
@@ -19,3 +19,4 @@ def health_check():
 
 app.include_router(auth.router)
 app.include_router(measurements.router)
+app.include_router(fatigue_data.router)

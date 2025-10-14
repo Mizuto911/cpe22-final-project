@@ -1,6 +1,6 @@
-from api.basemodels import FatigueDataRecord
+from api.basemodels import FatigueDataRecord, FatigueAssessment
 from api.models import FatigueData
-from api.deps import user_dependency, db_dependency
+from api.deps import user_dependency, db_dependency, user_object_dependency
 from fastapi import APIRouter, status
 from api.ai_models.decision_tree_ai import has_fatigue_risk
 
@@ -11,17 +11,16 @@ def get_fatigue_data(db: db_dependency, user: user_dependency, fatigue_data_id: 
     return db.query(FatigueData).filter(FatigueData.id == fatigue_data_id).first()
 
 @router.get('/fatiguedata')
-def get_user_fatigue_data(db: db_dependency, user: user_dependency, user_id: int):
+def get_user_fatigue_data(db: db_dependency, user: user_dependency):
     return db.query(FatigueData).filter(FatigueData.user_id == user.get('id')).all()
 
-@router.post('/', status_code=status.HTTP_201_CREATED)
-def record_fatigue_data(db: db_dependency, user: user_dependency, fatigue_data: FatigueDataRecord):
+@router.post('/', status_code=status.HTTP_201_CREATED, response_model=FatigueAssessment)
+def record_fatigue_data(db: db_dependency, user: user_dependency, fatigue_data: FatigueDataRecord, user_object: user_object_dependency):
     db_fatigue_data = FatigueData(**fatigue_data.model_dump(), user_id=user.get('id'))
     db.add(db_fatigue_data)
     db.commit()
     db.refresh(db_fatigue_data)
-    output = str(db_fatigue_data) + 'Fatigue Risk Detected!' if has_fatigue_risk(fatigue_data) else 'No Risk of Fatigue'
-    return output
+    return {'data': db_fatigue_data, 'fatigue_risk': has_fatigue_risk(fatigue_data, user_object)}
 
 @router.delete('/')
 def delete_fatigue_data(db: db_dependency, user: user_dependency, fatigue_data_id: int):

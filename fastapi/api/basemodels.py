@@ -1,4 +1,6 @@
 from pydantic import BaseModel
+from datetime import date, datetime
+from typing import Optional
 
 class MeasurementBase(BaseModel):
     bpm: int
@@ -10,6 +12,8 @@ class MeasurementRecord(MeasurementBase):
 class UserCreateRequest(BaseModel):
     username: str
     password: str
+    birthday: date
+    is_female: Optional[bool] = False
 
 class Token(BaseModel):
     access_token:str
@@ -22,3 +26,25 @@ class FatigueDataBase(BaseModel):
 
 class FatigueDataRecord(FatigueDataBase):
     pass
+
+class FatigueDataResponse(BaseModel):
+    id: int
+    rhh: int
+    hrr: int
+    train_time: float
+    user_id: int
+
+class MeasurementResponse(BaseModel):
+    id: int
+    bpm: int
+    temperature: int
+    timestamp: datetime
+    user_id: int
+
+class FatigueAssessment(BaseModel):
+    data: FatigueDataResponse
+    fatigue_risk: bool
+
+class OverworkAssessment(BaseModel):
+    data: MeasurementResponse
+    overworked: bool

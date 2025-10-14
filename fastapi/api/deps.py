@@ -7,6 +7,7 @@ from jose import jwt, JWTError
 from dotenv import  load_dotenv
 import os
 from .database import SessionLocal
+from .models import User
 
 load_dotenv()
 
@@ -37,3 +38,14 @@ async def get_current_user(token: oauth2_bearer_dependency):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='Could not validate user')
     
 user_dependency = Annotated[dict, Depends(get_current_user)]
+
+async def get_current_user_object(db: db_dependency, token_user_data: user_dependency) -> User:
+    user_id = token_user_data.get('id')
+    user_object = db.query(User).filter(User.id == user_id).first()
+
+    if user_object:
+        return user_object
+    else:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='Could not find user')
+    
+user_object_dependency = Annotated[User, Depends(get_current_user_object)]

@@ -32,7 +32,10 @@ def create_access_token(username:str, user_id:int, expires_delta:timedelta):
 
 @router.post('/', status_code=status.HTTP_201_CREATED)
 async def create_user(db: db_dependency, create_user_request: UserCreateRequest):
-    create_user_request = User(name=create_user_request.username, hashed_password=bcrypt_context.hash(create_user_request.password))
+    create_user_request = User(name=create_user_request.username, 
+                               hashed_password=bcrypt_context.hash(create_user_request.password),
+                               birthday=create_user_request.birthday,
+                               is_female=create_user_request.is_female)
     db.add(create_user_request)
     db.commit()
 
