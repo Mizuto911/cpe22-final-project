@@ -1,13 +1,14 @@
 aiofiles
 annotated-types
 anyio
-bcrypt
+bcrypt==4.1.2
 click
 ecdsa
 fastapi
 h11
 idna
 pyasn1
+passlib
 pydantic
 pydantic_core
 python-jose

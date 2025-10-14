@@ -9,6 +9,7 @@ class User(Base):
     name = Column(String)
     hashed_password = Column(String)
     measurements = relationship('Measurement', back_populates='user')
+    fatigue_risk_data = relationship('FatigueData', back_populates='user')
 
 class Measurement(Base):
     __tablename__='measurements'
@@ -17,3 +18,13 @@ class Measurement(Base):
     bpm = Column(Integer)
     temperature = Column(Float)
     user = relationship('User', back_populates='measurements')
+    user_id = Column(Integer, ForeignKey('users.id'))
+
+class FatigueData(Base):
+    __tablename__='fatigue_data'
+    id = Column(Integer, primary_key=True)
+    rhh = Column(Integer) # Resting Heart Rate
+    hrr = Column(Float) # Heart Rate Recovery
+    train_time = Column(Float)
+    user = relationship('User', back_populates='fatigue_risk_data')
+    user_id = Column(Integer, ForeignKey('users.id'))
