@@ -20,3 +20,6 @@ def is_abnormal_reading(measurement: MeasurementRecord, age: int):
     if measurement.temperature<35.0 or measurement.temperature>38.3:
         return True
     return False
+
+def has_fatigue_risk(fatigue_data):
+    return True
