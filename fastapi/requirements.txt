@@ -21,3 +21,4 @@ starlette
 typing_extensions
 uvicorn
 python-dotenv
+scikit-learn

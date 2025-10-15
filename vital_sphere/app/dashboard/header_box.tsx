@@ -1,6 +1,6 @@
 import React from 'react'
 import Image from 'next/image'
-import header_image from '../images/header-image.webp'
+import header_image from '../../public/images/header-image.png'
 
 const HeaderBox = () => {
   return (
@@ -24,7 +24,6 @@ const HeaderBox = () => {
 
             <div className='hidden lg:block absolute end-0 top-0 h-full w-150 overflow-hidden rounded-xl'>
               <Image src={header_image} alt='header_image object-cover' className='object-cover'></Image>
-              <div className="absolute inset-0 bg-gradient-to-r from-[#B84DB1] to-black/10" />
             </div>
           </div>
         </div>

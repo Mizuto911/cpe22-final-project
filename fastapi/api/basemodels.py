@@ -37,7 +37,7 @@ class FatigueDataResponse(BaseModel):
 class MeasurementResponse(BaseModel):
     id: int
     bpm: int
-    temperature: int
+    temperature: float
     timestamp: datetime
     user_id: int
 

@@ -1,7 +1,7 @@
 import React from 'react'
 import { GiHamburgerMenu } from "react-icons/gi"
 import { IoGridOutline } from "react-icons/io5"
-import defaultUserImage from '../images/default_user.jpg'
+import defaultUserImage from '../../public/images/default_user.jpg'
 import Image from 'next/image'
 import HeaderBox from './header_box'
 import AthleteList from './athlete_list'
