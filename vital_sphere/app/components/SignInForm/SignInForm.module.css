@@ -1,0 +1,42 @@
+.errorEnter {
+    animation-name: errorEnter;
+    animation-duration: 300ms;
+    animation-timing-function: ease-in-out;
+    animation-iteration-count: 1;
+    animation-fill-mode: forwards;
+    transform: translateY(-100px);
+    opacity: 0;
+}
+
+@keyframes errorEnter {
+    0% {
+        transform: translateY(100px);
+        opacity: 0;
+    }
+    100% {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.loadingEnter {
+    animation-name: loadingEnter;
+    animation-duration: 300ms;
+    animation-timing-function: ease-in-out;
+    animation-iteration-count: 1;
+    animation-fill-mode: forwards;
+    transform: scaleY(0);
+    transform-origin: top;
+}
+
+@keyframes loadingEnter {
+    0% {
+        transform: scaleY(0);
+    }
+    85% {
+        transform: scaleY(1.5);
+    }
+    100% {
+        transform: scaleY(1);
+    }
+}

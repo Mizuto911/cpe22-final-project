@@ -1,88 +1,21 @@
-"use client";
+import { createContext } from "react";
 
-import { createContext, useState, ReactNode } from 'react'
-import axios from 'axios'
-import { useRouter } from 'next/navigation'
-
-interface AuthProviderProps {
-    children: ReactNode
+type AuthDetailsType = {
+    user: object | null,
+    isAuthenticated: boolean,
+    login: (formData: FormData) => Promise<boolean>,
+    register: (formData: FormData) => void,
+    logOut: () => void
 }
 
-interface AuthContextType {
-    user: any | null
-    isAuthenticated: boolean
-    login: (username: string, password: string) => Promise<void>
-    register: (username: string, password: string, birthday: Date, isFemale: boolean) => Promise<void>
-    logout: () => void
-}
-
-const initialAuthContext: AuthContextType = {
+const authDetails: AuthDetailsType = {
     user: null,
     isAuthenticated: false,
-    login: async() => {},
+    login: async() => false,
     register: async() => {},
-    logout: () => {}
+    logOut: () => {}
 }
 
-const AuthContext = createContext<AuthContextType>(initialAuthContext)
+const AuthContext = createContext(authDetails);
 
-export const AuthProvider = ({ children }: AuthProviderProps) => {
-    const [user, setUser] = useState(null);
-    const router = useRouter()
-
-    const isAuthenticated = !!user
-
-    const login = async (username: string, password: string) => {
-        try {
-            const formData = new FormData()
-            formData.append('username', username)
-            formData.append('password', password)
-            const response = await axios.post('http://localhost:8000/auth/token', formData, {
-                headers:{ 'Content-Type': 'application/x-www-form-urlencoded' }
-            })
-            axios.defaults.headers.common['Authorization'] = 'Bearer ' + String(response.data.access_token)
-            localStorage.setItem('token', response.data.access_token)
-            setUser(response.data)
-            router.push('/dashboard')
-        } catch (error) {
-            console.log('Sign-in Failed: ', error)
-        }
-    }
-
-    const register = async (username: string, password: string, birthday: Date, isFemale: boolean) => {
-        try {
-            const registrationPayload = {
-                username: username,
-                password: password,
-                birthday: birthday.toISOString().split('T')[0],
-                is_female: isFemale
-            }
-            const response = await axios.post('http://localhost:8000/auth/', registrationPayload, {
-                headers: {'Content-Type': 'application/json'}
-            })
-            
-            if(response.status == 201 || response.status == 200) {
-                console.log('Registration Successful: ', response.data)
-                router.push('/start/sign_in')
-            } else {
-                console.log(response.status)
-            }
-        } catch (error) {
-            console.log('Registration Failed: ', error)
-        }
-    }
-
-    const logout = () => {
-        setUser(null)
-        delete axios.defaults.headers.common['Authorization']
-        router.push('/')
-    }
-
-    return (
-    <AuthContext.Provider value={{ user, isAuthenticated, login, register, logout }}>
-        { children }
-    </AuthContext.Provider>
-    )
-}
-
-export default AuthContext
+export default AuthContext;

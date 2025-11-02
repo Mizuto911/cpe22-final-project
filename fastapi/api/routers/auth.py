@@ -6,7 +6,7 @@ from jose import jwt
 from dotenv import load_dotenv
 import os
 from api.models import User
-from api.deps import db_dependency, bcrypt_context
+from api.deps import db_dependency, bcrypt_context, user_dependency
 from api.basemodels import UserCreateRequest, Token
 
 load_dotenv()
@@ -46,4 +46,10 @@ async def login_for_access_token(formdata: Annotated[OAuth2PasswordRequestForm, 
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='Unable to validate user')
     token = create_access_token(user.name, user.id, timedelta(hours=2))
     return {'access_token': token, 'token_type': 'bearer'}
+
+@router.get('/data', response_model = UserCreateRequest)
+async def get_user_data(db: db_dependency, user: user_dependency):
+    if not user:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='Must be Authorized to access data.')
+    return db.query(User).filter(User.id == user.get('id')).first()
     
