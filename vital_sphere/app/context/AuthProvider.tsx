@@ -3,6 +3,7 @@
 import { ReactNode, useState } from "react"
 import { useRouter } from "next/navigation";
 import AuthContext from "./AuthContext";
+import { RegisterResponseData, LoginResponseData } from "../modules/DataTypes";
 
 type AuthProviderProps = {
     children: ReactNode
@@ -16,7 +17,7 @@ const AuthProvider = ({ children }: AuthProviderProps) => {
 
     const isAuthenticated = user != null;
 
-    async function login(formData: FormData) {
+    async function login(formData: FormData): Promise<LoginResponseData> {
         try {
             const data = new URLSearchParams({
                 username: formData.get('username') as string,
@@ -34,27 +35,27 @@ const AuthProvider = ({ children }: AuthProviderProps) => {
                 localStorage.setItem('token', loginToken.access_token);
                 setUser(loginToken.data);
                 router.push('/dashboard');
-                return true;
+                return {success: true, message: 'Login Successful!'};
             }
             else {
                 const errorData = await response.json();
                 console.log(`Log In Failed: ${String(errorData.message)}`);
-                return false;
+                return {success: false, message: 'Incorrect User Name or Password!'};
             }
         }
         catch (e) {
             console.log(`Login Failed: ${String(e)}`);
-            return false;
+            return {success: false, message: 'Unable to Connect to Server'};
         }
     }
 
-    async function register(formData: FormData) {
+    async function register(formData: FormData): Promise<RegisterResponseData> {
         try {
             const data = {
                 username: formData.get('username'),
                 password: formData.get('password'),
-                birthday: (new Date('September 11, 2003')).toISOString().split('T')[0],
-                is_female: true
+                birthday: formData.get('birthday'),
+                is_female: formData.get('gender') === 'female' ? true : false
             }
             const response = await fetch('http://localhost:8000/auth', {
                 method: 'POST',
@@ -63,26 +64,29 @@ const AuthProvider = ({ children }: AuthProviderProps) => {
             })
 
             if (response.ok) {
-                console.log('Register Successful!');
-                router.push('/?registered=true');
-                return true;
+                const registerData = await response.json();
+                if (registerData.ok) {
+                    console.log('Register Successful!');
+                    router.push('/?registered=true');
+                }
+                return registerData;
             }
             else {
                 const errorData = await response.json();
                 console.log(`Log In Failed: ${String(errorData.message)}`);
-                return false;
+                return errorData;
             }
         }
         catch (e) {
             console.log(`Login Failed: ${String(e)}`);
-            return false;
+            return {data: 'None', message: 'Unable to Connect to Server!', ok: false};
         }
     }
 
     const logOut = () => {
         setUser(null);
         localStorage.removeItem('token');
-        router.push('/')
+        router.push('/');
     }
 
     const authProviderValue = { user, isAuthenticated, login, register, logOut }

@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import React from 'react'
 import Image from 'next/image'
-import SignInForm from './components/SignInForm/SignInForm'
+import SignInForm from './components/SignInForm'
 
 const page = () => {
   return (
@@ -16,7 +16,7 @@ const page = () => {
       </section>
       <section className='max-md:hidden shrink-4 overflow-hidden grow-1 h-[95%] m-6 w-auto'>
         <Image src="/images/welcome_bg.jpg" alt="Welcome Background" width={1920} height={1080} 
-          className='w-[100%] h-[100%] max-lg:object-[calc(100%+350px)_center] object-cover object-right rounded-2xl'
+          className='w-[100%] h-[100%] object-cover object-right max-lg:object-[80%] rounded-2xl'
         />
       </section>
     </div>

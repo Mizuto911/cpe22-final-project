@@ -1,19 +1,15 @@
 'use client'
-
 import { useState, useContext, FormEvent } from 'react';
-import AuthContext from '../../context/AuthContext';
+import { hasEmptyFields } from '@/app/modules/FormModule';
+import AuthContext from '../context/AuthContext';
 import Link from 'next/link';
-import style from './SignInForm.module.css' 
+import style from './Forms.module.css' 
 
 const SignInForm = () => {
 
     const { login } = useContext(AuthContext);
     const [isLoading, setLoading] = useState(false);
     const [errorMessage, setErrorMessage] = useState('');
-
-    function checkFields(formData: FormData): boolean {
-        return !formData.get('username') || !formData.get('password');
-    }
 
     async function handleSubmit(event: FormEvent<HTMLFormElement>) {
         event.preventDefault();
@@ -25,7 +21,7 @@ const SignInForm = () => {
 
         const formData = new FormData(event.currentTarget);
 
-        if(checkFields(formData)) {
+        if(hasEmptyFields(formData)) {
             setErrorMessage('Please Fill in the Fields');
             return
         }
@@ -34,8 +30,8 @@ const SignInForm = () => {
         }
         const successfulLogin = await login(formData);
 
-        if(!successfulLogin) {
-            setErrorMessage('Log In Failed');
+        if(!successfulLogin.success) {
+            setErrorMessage(successfulLogin.message);
             setLoading(false);
         }
     }

@@ -7,7 +7,8 @@ from dotenv import load_dotenv
 import os
 from api.models import User
 from api.deps import db_dependency, bcrypt_context, user_dependency
-from api.basemodels import UserCreateRequest, Token
+from api.basemodels import UserCreateRequest, Token, UserGetRequest
+from sqlalchemy.exc import IntegrityError
 
 load_dotenv()
 
@@ -37,7 +38,25 @@ async def create_user(db: db_dependency, create_user_request: UserCreateRequest)
                                birthday=create_user_request.birthday,
                                is_female=create_user_request.is_female)
     db.add(create_user_request)
-    db.commit()
+    try: 
+        db.commit()
+        return { 
+            'ok': True, 
+            'message': f'User created successfully!', 
+            'data': { 
+                'name': create_user_request.name,
+                'hashed_password': create_user_request.hashed_password,
+                'birthday': create_user_request.birthday,
+                'is_female': create_user_request.is_female
+            } 
+        }
+    except IntegrityError as e:
+        db.rollback()
+        return {
+            'ok': False,
+            'message': 'User Name already exists!',
+            'data': 'Status Code 409'
+        }
 
 @router.post('/token', response_model=Token)
 async def login_for_access_token(formdata: Annotated[OAuth2PasswordRequestForm, Depends()], db: db_dependency):
@@ -47,7 +66,7 @@ async def login_for_access_token(formdata: Annotated[OAuth2PasswordRequestForm, 
     token = create_access_token(user.name, user.id, timedelta(hours=2))
     return {'access_token': token, 'token_type': 'bearer'}
 
-@router.get('/data', response_model = UserCreateRequest)
+@router.get('/data', response_model=UserGetRequest)
 async def get_user_data(db: db_dependency, user: user_dependency):
     if not user:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='Must be Authorized to access data.')

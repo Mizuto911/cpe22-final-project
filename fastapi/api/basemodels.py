@@ -15,6 +15,13 @@ class UserCreateRequest(BaseModel):
     birthday: date
     is_female: Optional[bool] = False
 
+class UserGetRequest(BaseModel):
+    id: int
+    name: str
+    hashed_password: str
+    birthday: date
+    is_female: Optional[bool] = False
+
 class Token(BaseModel):
     access_token:str
     token_type:str

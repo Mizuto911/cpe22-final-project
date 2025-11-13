@@ -1,0 +1,2 @@
+export const bdayDoubtMessage = 'Your birthday is used to determine your age. This will help us greatly in determining your Maximum Heart Rate 😊';
+export const genderDoubtMessage = 'Knowing your Gender plays a vital role in determining your Fatigue risk 😊'
