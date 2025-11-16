@@ -6,7 +6,7 @@ import { MdCancel } from "react-icons/md";
 
 const DeviceConnect = () => {
   return (
-    <div className="p-8 flex flex-col items-center gap-20 w-full h-full">
+    <div className="p-8 flex flex-col items-center gap-20 w-full">
         <h1 className="font-bold text-4xl w-full">Connect Device</h1>
         <section className="p-5 rounded-xl flex flex-col justify-center items-center 
                             min-h-[150px] gap-4 shadow-xl bg-base-100">

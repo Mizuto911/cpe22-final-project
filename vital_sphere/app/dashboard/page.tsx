@@ -1,27 +1,83 @@
-import React from 'react'
-import { GiHamburgerMenu } from "react-icons/gi"
-import { IoGridOutline } from "react-icons/io5"
-import defaultUserImage from '../../public/images/default_user.jpg'
-import Image from 'next/image'
-import HeaderBox from './header_box'
-import AthleteList from './athlete_list'
+'use client';
+import DeviceConnect from "../components/TabComponents/DeviceConnect"
+import TrainingSession from "../components/TabComponents/TrainingSession";
+import VitalSummary from "../components/TabComponents/VitalSummary";
+import Settings from "../components/TabComponents/Settings";
+import Dashboard from "../components/TabComponents/Dashboard";
+import Image from "next/image"
+import { IoIosNotifications } from "react-icons/io";
+import UserMenuItem from "../components/UserMenuItem";
+import MenuList from "../components/MenuList";
+import { useState, useContext, useEffect } from 'react';
+import { Tabs, TabList } from "../modules/DataTypes";
+import AuthContext from "../context/AuthContext";
+import ProtectedRoute from "../components/ProtectedRoute";
+import { UserData } from "../modules/DataTypes";
+
+const defaultUserDisplay: UserData = {
+  id: 0,
+  name: '',
+  birthday: new Date(),
+  is_female: false
+}
 
 const page = () => {
+  const [activeTab, setActiveTab] = useState(Tabs.DASHBOARD);
+  const [userData, setUserData] = useState(defaultUserDisplay);
+  const [isLoading, setLoading] = useState(true);
+  const { logOut, getUserData } = useContext(AuthContext);
+
+  useEffect(() => {
+    setLoading(true);
+    const fetchUserData = async () => {
+      setUserData(await getUserData());
+    }
+    fetchUserData();
+    setLoading(false);
+  }, []);
+
+  function getActiveTab() {
+    switch (activeTab){
+      case Tabs.DASHBOARD:
+        return <Dashboard userData={userData} setActive={setActiveTab} />
+      case Tabs.TRAINING_SESSION:
+        return <TrainingSession />
+      case Tabs.CONNECT_DEVICE:
+        return <DeviceConnect />
+      case Tabs.VITALS_SUMMARY:
+        return <VitalSummary />
+      case Tabs.SETTINGS:
+        return <Settings />
+    }
+  }
+
   return (
-    <div className='bg-white flex-col space-y-2 items-center justify-center p-5'>
-        <header className='bg-white'>
-            <div className='absolute top-0 left-0 flex justify-start items-center mt-10 ms-10'>
-                <GiHamburgerMenu className='h-8 w-8 me-7 text-black'/>
-                <h1 className='h-8 me-7 mb-2 font-bold text-4xl text-black'>Vital Sphere</h1>
-            </div>
-            <div className='absolute end-0 top-0 flex justify-end items-center mt-7 ms-10'>
-                <IoGridOutline className='h-10 w-10 me-4 text-black'/>
-                <Image src={defaultUserImage} alt='defaultUserImage' className='rounded-full h-15 w-15 me-8'></Image>
-            </div>
-        </header>
-        <HeaderBox/>
-        <AthleteList/>
-    </div>
+
+      <main className="flex flex-row max-w-screen max-h-screen overflow-y-hidden">
+          <section className="bg-primary-content min-w-[300px] w-[450px] h-screen rounded-tr-2xl rounded-br-2xl shadow-xl overflow-y-auto max-h-screen">
+            <div className="flex flex-row gap-3 items-center p-4.5 mb-10">
+                <Image src="/images/app_logo.png" alt="Vital Sphere Logo" width={64} height={64} /> 
+                <h2 className="font-bold text-2xl text-primary">Vital Sphere</h2>
+              </div>
+              <UserMenuItem userData={userData} />
+              <MenuList setActive={setActiveTab} activeTab={activeTab} logOut={logOut}/>
+          </section>
+          <section className="w-full h-screen bg-base-200">
+              <header className="flex flex-row justify-between items-center p-4 shadow-sm shadow-gray-200 w-full h-16">
+                  <h2 className="font-bold text-xl ms-3 text-primary">{TabList[activeTab].name}</h2>
+                  <div className="flex flex-row gap-4 items-center">
+                    <span className="text-2xl text-gray-600"><IoIosNotifications /></span>
+                    <Image src="/images/default_user.jpg" alt="User Profile" width={40} height={40}
+                      className="rounded-[50%]" />
+                  </div>
+              </header>
+              {getActiveTab()}
+          </section>
+          {isLoading && <div className="fixed top-0 bottom-0 w-screen h-screen grid place-content-center bg-[rgba(0,0,0,0.5)]">
+                    <div className={`loading loading-spinner loading-xl text-primary mb-4`}></div>
+                </div>}
+      </main>
+    
   )
 }
 

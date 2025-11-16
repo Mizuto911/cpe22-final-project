@@ -58,7 +58,7 @@ const RegistrationForm = () => {
                 <Image className="inline-block mb-1" data-tooltip-id='bday-tooltip' data-tooltip-content={bdayDoubtMessage}
                     src='/images/doubt-icon.png' alt="Doubt Icon" width={15} height={15}
                 />: 
-                <Tooltip id="bday-tooltip" style={{maxWidth: '200px'}}/>
+                <Tooltip id="bday-tooltip" style={{maxWidth: '200px', zIndex: '1'}}/>
                 </label>
                 <DayPicker
                     className="react-day-picker"
@@ -80,7 +80,7 @@ const RegistrationForm = () => {
                 <Image className="inline-block mb-1" data-tooltip-id='gender-tooltip' data-tooltip-content={genderDoubtMessage}
                     src='/images/doubt-icon.png' alt="Doubt Icon" width={15} height={15}
                 />: 
-                <Tooltip id="gender-tooltip" style={{maxWidth: '200px'}}/> 
+                <Tooltip id="gender-tooltip" style={{maxWidth: '200px', zIndex: '1'}}/> 
                 </label>
                 <div className="flex gap-8">
                     <div className={`px-5 py-3 rounded-2xl duration-300 ${!isFemale ? 'bg-primary-content' : ''}`}>

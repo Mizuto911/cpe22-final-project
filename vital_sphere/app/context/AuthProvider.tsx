@@ -33,7 +33,7 @@ const AuthProvider = ({ children }: AuthProviderProps) => {
                 const loginToken = await response.json();
                 console.log('Login Successful!')
                 localStorage.setItem('token', loginToken.access_token);
-                setUser(loginToken.data);
+                setUser(loginToken);
                 router.push('/dashboard');
                 return {success: true, message: 'Login Successful!'};
             }
@@ -83,13 +83,28 @@ const AuthProvider = ({ children }: AuthProviderProps) => {
         }
     }
 
+    const getUserData = async () => {
+        try {
+            const response = await fetch('http://localhost:8000/auth/data', 
+                {method: 'GET', headers:{Authorization: `Bearer ${localStorage.getItem('token')}`}});
+            const userData = await response.json();
+            console.log('User Data get Complete!');
+            console.log(userData);
+            return userData;
+        }
+        catch (e) {
+            console.log(`User Data Failed to Get: ${String(e)}`);
+            return null;
+        }
+    }
+
     const logOut = () => {
         setUser(null);
         localStorage.removeItem('token');
         router.push('/');
     }
 
-    const authProviderValue = { user, isAuthenticated, login, register, logOut }
+    const authProviderValue = { user, isAuthenticated, login, register, getUserData, logOut }
 
     return (
         <AuthContext.Provider value={authProviderValue}>

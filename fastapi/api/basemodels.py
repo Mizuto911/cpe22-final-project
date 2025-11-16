@@ -18,7 +18,6 @@ class UserCreateRequest(BaseModel):
 class UserGetRequest(BaseModel):
     id: int
     name: str
-    hashed_password: str
     birthday: date
     is_female: Optional[bool] = False
 
