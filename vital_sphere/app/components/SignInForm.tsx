@@ -1,6 +1,6 @@
 'use client'
 import { useState, useContext, FormEvent } from 'react';
-import { hasEmptyFields } from '@/app/modules/FormModule';
+import { hasEmptyFields } from '@/app/modules/UtilityModules';
 import AuthContext from '../context/AuthContext';
 import Link from 'next/link';
 import style from './Forms.module.css' 

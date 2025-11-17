@@ -5,7 +5,7 @@ const page = () => {
   return (
     <div className='h-screen w-screen bg-base-300 flex flex-col justify-start items-center overflow-y-scroll'>
       <header>
-        <h1 className='text-center my-4 font-bold max-md:text-3xl text-3xl text-primary'>Vital Shere</h1>
+        <h1 className='text-center my-4 font-bold max-md:text-3xl text-3xl text-primary'>Vital Sphere</h1>
       </header>
       <section className='bg-white rounded-2xl w-full max-w-[700px] shadow-lg mb-5 max-md:w-[95%]'>
         <div className='bg-primary p-4 rounded-t-2xl shadow-lg'>

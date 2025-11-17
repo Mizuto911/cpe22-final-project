@@ -13,6 +13,7 @@ import { Tabs, TabList } from "../modules/DataTypes";
 import AuthContext from "../context/AuthContext";
 import ProtectedRoute from "../components/ProtectedRoute";
 import { UserData } from "../modules/DataTypes";
+import { supportsBluetooth } from "@/app/modules/UtilityModules";
 
 const defaultUserDisplay: UserData = {
   id: 0,
@@ -25,7 +26,18 @@ const page = () => {
   const [activeTab, setActiveTab] = useState(Tabs.DASHBOARD);
   const [userData, setUserData] = useState(defaultUserDisplay);
   const [isLoading, setLoading] = useState(true);
+  const [hasBluetooth, setHasBluetooth] = useState(false);
+  const [monitorDevice, setMonitorDevice] = useState<BluetoothDevice | null>(null);
+  const [heartRateChar, setHeartRateChar] = useState<BluetoothRemoteGATTCharacteristic | null>(null);
+  const [bodyTempChar, setBodyTempChar] = useState<BluetoothRemoteGATTCharacteristic | null>(null);
   const { logOut, getUserData } = useContext(AuthContext);
+
+  useEffect(() => {
+    async function bluetooth() {
+      setHasBluetooth(await supportsBluetooth());
+    }
+    bluetooth();
+  }, []);
 
   useEffect(() => {
     setLoading(true);
@@ -38,21 +50,28 @@ const page = () => {
 
   function getActiveTab() {
     switch (activeTab){
+
       case Tabs.DASHBOARD:
         return <Dashboard userData={userData} setActive={setActiveTab} />
+
       case Tabs.TRAINING_SESSION:
         return <TrainingSession />
+
       case Tabs.CONNECT_DEVICE:
-        return <DeviceConnect />
+        return <DeviceConnect hasBluetooth={hasBluetooth} device={monitorDevice} setDevice={setMonitorDevice} 
+            setLoading={setLoading} setHeartRateChar={setHeartRateChar} setBodyTempChar={setBodyTempChar} />
+
       case Tabs.VITALS_SUMMARY:
         return <VitalSummary />
+
       case Tabs.SETTINGS:
         return <Settings />
+
     }
   }
 
   return (
-
+    <ProtectedRoute>
       <main className="flex flex-row max-w-screen max-h-screen overflow-y-hidden">
           <section className="bg-primary-content min-w-[300px] w-[450px] h-screen rounded-tr-2xl rounded-br-2xl shadow-xl overflow-y-auto max-h-screen">
             <div className="flex flex-row gap-3 items-center p-4.5 mb-10">
@@ -62,7 +81,7 @@ const page = () => {
               <UserMenuItem userData={userData} />
               <MenuList setActive={setActiveTab} activeTab={activeTab} logOut={logOut}/>
           </section>
-          <section className="w-full h-screen bg-base-200">
+          <section className="w-full min-h-screen bg-base-200">
               <header className="flex flex-row justify-between items-center p-4 shadow-sm shadow-gray-200 w-full h-16">
                   <h2 className="font-bold text-xl ms-3 text-primary">{TabList[activeTab].name}</h2>
                   <div className="flex flex-row gap-4 items-center">
@@ -77,7 +96,7 @@ const page = () => {
                     <div className={`loading loading-spinner loading-xl text-primary mb-4`}></div>
                 </div>}
       </main>
-    
+    </ProtectedRoute>
   )
 }
 

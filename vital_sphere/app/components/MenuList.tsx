@@ -18,7 +18,7 @@ const MenuList = (props: MenuListProps) => {
 
     const tabListElements = TabList.map((tab, index) => {
         const className = clsx(
-            'flex flex-row items-center mx-8 mb-1 p-4 rounded-2xl font-bold',
+            'flex flex-row items-center mx-8 mb-1 p-2 rounded-2xl font-bold',
             index == props.activeTab ? 'bg-primary text-white' : 'hover:bg-info hover:cursor-pointer transition-[300ms]'
         );
 
@@ -30,7 +30,7 @@ const MenuList = (props: MenuListProps) => {
   return (
     <ul className='mt-12'>
         {tabListElements}
-        <li className='flex flex-row items-center mx-8 mb-1 p-4 text-red-800 rounded-2xl hover:bg-error hover:cursor-pointer transition-[300ms] font-bold mt-7'
+        <li className='flex flex-row items-center mx-8 mb-1 p-2 text-red-800 rounded-2xl hover:bg-error hover:cursor-pointer transition-[300ms] font-bold mt-7'
             onClick={() => props.logOut()}>
             <MdLogout className='text-3xl me-6' /> Log Out
         </li>
