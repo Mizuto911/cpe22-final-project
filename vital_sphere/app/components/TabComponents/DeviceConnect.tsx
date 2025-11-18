@@ -1,25 +1,53 @@
 'use client'
 import { RiRestartFill } from "react-icons/ri";
 import { MdCancel } from "react-icons/md";
-import { requestDevice, connectDevice } from '@/app/modules/UtilityModules'
+import { useState } from 'react';
+import { requestDevice, connectDevice, disconnectDevice } from '@/app/modules/UtilityModules';
+import { Tabs } from "@/app/modules/DataTypes";
+import clsx from "clsx";
 
 interface DeviceConnectProps {
   hasBluetooth: boolean
   device: BluetoothDevice | null
   setDevice: Function
   setLoading: Function
-  setHeartRateChar: Function
-  setBodyTempChar: Function
+  setMonitorData: Function
+  setCommandSend: Function
+  setSummaryData: Function
+  setActive: Function
 }
 
 const DeviceConnect = (props: DeviceConnectProps) => {
+  const [connecting, setConnecting] = useState(false);
+
+  const cardText = props.device ? `Device Connected: ${props.device.name}` : 'Select Monitoring device to connect...';
+  const buttonText = props.device ? 'Start Training' : 
+      connecting ? <><span className="loading loading-spinner text-primary-content"></span>Connecting</> : "Connect";
+  const buttonClassName = clsx('rounded-md btn', props.device ? 'btn-success' : 'btn-primary');
 
   async function handleConnect() {
-    const device = await requestDevice();
-    const chars = await connectDevice(device);
-    props.setDevice(device);
-    props.setHeartRateChar(chars?.heartRate);
-    props.setBodyTempChar(chars?.bodyTemp);
+    if (props.device) {
+      props.setActive(Tabs.TRAINING_SESSION);
+    }
+    else {
+      setConnecting(true);
+      try {
+        const device = await requestDevice(props.setDevice);
+        const chars = await connectDevice(device);
+        props.setDevice(device);
+        props.setMonitorData(chars?.monitor);
+        props.setCommandSend(chars?.command);
+        props.setSummaryData(chars?.summary);
+      }
+      finally {
+        setConnecting(false);
+      }
+    }
+  }
+
+  function handleDisconnect() {
+    if(props.device)
+      disconnectDevice(props.device, props.setDevice);
   }
 
   return (
@@ -27,13 +55,12 @@ const DeviceConnect = (props: DeviceConnectProps) => {
         <p className="text-xl w-full">Connect your Monitoring Device through Bluetooth.</p>
         <section className="p-5 rounded-xl flex flex-col justify-center items-center 
                             w-[50%] min-w-[250px] max-w-[1000px] h-[250px] gap-4 shadow-xl bg-base-100">
-            <h2 className=" font-bold text-center text-[clamp(1rem,1.5vw,1.3rem)]">Select Monitoring device to connect...</h2>
-            <button className="btn btn-primary rounded-md" onClick={handleConnect}>Connect</button>
-        </section>
-
-        <section className="flex flex-row justify-center gap-12 mt-[-2rem]">
-            <button className="btn btn-soft btn-error rounded-md"><span className="text-xl"><MdCancel/></span> Cancel</button>
-            <button className="btn btn-soft btn-success rounded-md"><span className="text-xl"><RiRestartFill /></span> Retry</button>
+            <h2 className=" font-bold text-center text-[clamp(1rem,1.5vw,1.3rem)]">{cardText}</h2>
+            <div className="flex flex-row flex-wrap gap-4 justify-center">
+              <button className={buttonClassName} onClick={handleConnect}>{buttonText}</button>
+              {props.device ? <button className='btn btn-error rounded-md' 
+                  onClick={handleDisconnect}>Disconnect</button> : null}
+            </div>
         </section>
 
         {!props.hasBluetooth && <p className="text-error-content p-4 bg-error rounded-xl font-bold">

@@ -25,26 +25,25 @@ const defaultUserDisplay: UserData = {
 const page = () => {
   const [activeTab, setActiveTab] = useState(Tabs.DASHBOARD);
   const [userData, setUserData] = useState(defaultUserDisplay);
+  const [training, setTraining] = useState(false);
   const [isLoading, setLoading] = useState(true);
   const [hasBluetooth, setHasBluetooth] = useState(false);
   const [monitorDevice, setMonitorDevice] = useState<BluetoothDevice | null>(null);
-  const [heartRateChar, setHeartRateChar] = useState<BluetoothRemoteGATTCharacteristic | null>(null);
-  const [bodyTempChar, setBodyTempChar] = useState<BluetoothRemoteGATTCharacteristic | null>(null);
+  const [monitorData, setMonitorData] = useState<BluetoothRemoteGATTCharacteristic | null>(null);
+  const [commandSend, setCommandSend] = useState<BluetoothRemoteGATTCharacteristic | null>(null);
+  const [summaryData, setSummaryData] = useState<BluetoothRemoteGATTCharacteristic | null>(null);
   const { logOut, getUserData } = useContext(AuthContext);
 
   useEffect(() => {
+    setLoading(true);
     async function bluetooth() {
       setHasBluetooth(await supportsBluetooth());
     }
-    bluetooth();
-  }, []);
-
-  useEffect(() => {
-    setLoading(true);
     const fetchUserData = async () => {
       setUserData(await getUserData());
     }
     fetchUserData();
+    bluetooth();
     setLoading(false);
   }, []);
 
@@ -52,14 +51,15 @@ const page = () => {
     switch (activeTab){
 
       case Tabs.DASHBOARD:
-        return <Dashboard userData={userData} setActive={setActiveTab} />
+        return <Dashboard userData={userData} setActive={setActiveTab} device={monitorDevice} />
 
       case Tabs.TRAINING_SESSION:
-        return <TrainingSession />
+        return <TrainingSession device={monitorDevice} monitorData={monitorData} training={training}
+            setTraining={setTraining} commandSend={commandSend} summaryData={summaryData} setActive={setActiveTab} />
 
       case Tabs.CONNECT_DEVICE:
-        return <DeviceConnect hasBluetooth={hasBluetooth} device={monitorDevice} setDevice={setMonitorDevice} 
-            setLoading={setLoading} setHeartRateChar={setHeartRateChar} setBodyTempChar={setBodyTempChar} />
+        return <DeviceConnect hasBluetooth={hasBluetooth} device={monitorDevice} setDevice={setMonitorDevice} setActive={setActiveTab}
+            setLoading={setLoading} setMonitorData={setMonitorData} setCommandSend={setCommandSend} setSummaryData={setSummaryData} />
 
       case Tabs.VITALS_SUMMARY:
         return <VitalSummary />
@@ -73,13 +73,13 @@ const page = () => {
   return (
     <ProtectedRoute>
       <main className="flex flex-row max-w-screen max-h-screen overflow-y-hidden">
-          <section className="bg-primary-content min-w-[300px] w-[450px] h-screen rounded-tr-2xl rounded-br-2xl shadow-xl overflow-y-auto max-h-screen">
+          <section className="bg-primary-content min-w-[300px] max-md:min-w-0 h-screen rounded-tr-2xl rounded-br-2xl shadow-xl overflow-y-auto max-h-screen">
             <div className="flex flex-row gap-3 items-center p-4.5 mb-10">
                 <Image src="/images/app_logo.png" alt="Vital Sphere Logo" width={64} height={64} /> 
-                <h2 className="font-bold text-2xl text-primary">Vital Sphere</h2>
-              </div>
+                <h2 className="font-bold text-2xl text-primary max-md:hidden">Vital Sphere</h2>
+            </div>
               <UserMenuItem userData={userData} />
-              <MenuList setActive={setActiveTab} activeTab={activeTab} logOut={logOut}/>
+              <MenuList setActive={setActiveTab} activeTab={activeTab} logOut={logOut} training={training}/>
           </section>
           <section className="w-full min-h-screen bg-base-200">
               <header className="flex flex-row justify-between items-center p-4 shadow-sm shadow-gray-200 w-full h-16">

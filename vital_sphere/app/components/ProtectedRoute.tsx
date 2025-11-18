@@ -14,7 +14,7 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
 
     useEffect(() => {
         if(!user){
-            router.push('/?unauthorized=true')
+            router.push('/')
         }
     }, [user, router])
 

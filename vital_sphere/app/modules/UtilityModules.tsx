@@ -7,22 +7,27 @@ export async function connectDevice(device: BluetoothDevice) {
     if (device.gatt.connected) return;
 
     const server = await device.gatt.connect();
-    const heartRate = await server.getPrimaryService('heart_rate');
-    const bodyTemp = await server.getPrimaryService(0x1809);
+    const monitor = await server.getPrimaryService('b0f4ae30-32bb-48b4-94d7-4c6919ba87f7');
 
-    const heartRateChar = await heartRate.getCharacteristic('heart_rate_measurement');
-    const bodyTempChar = await bodyTemp.getCharacteristic(0x2A1C);
+    const monitorChar = await monitor.getCharacteristic('f8162892-960d-4198-bbdf-0044d4da1052');
+    const commandChar = await monitor.getCharacteristic('2eb13ad7-2b5f-4aec-ab5f-7b97adfd64fd');
+    const summaryChar = await monitor.getCharacteristic('067dcd65-ab22-4b60-be7f-9597a279b304');
 
-    return {heartRate: heartRateChar, bodyTemp: bodyTempChar};
+    return {monitor: monitorChar, command: commandChar, summary: summaryChar};
 }
 
-export async function requestDevice() {
+export async function requestDevice(setDevice: Function) {
     const device = await navigator.bluetooth.requestDevice({
         acceptAllDevices: true,
-        optionalServices: ['heart_rate', 0x1809]
+        optionalServices: ['b0f4ae30-32bb-48b4-94d7-4c6919ba87f7', 0x1809]
     });
-    device.addEventListener('gattserverdisconnected', () => connectDevice(device));
+    device.addEventListener('gattserverdisconnected', () => setDevice(null));
     return device;
+}
+
+export async function disconnectDevice(device: BluetoothDevice, setDevice: Function) {
+    device.gatt?.disconnect();
+    setDevice(null);
 }
 
 export async function startMonitoring(char: BluetoothRemoteGATTCharacteristic) {
@@ -40,9 +45,9 @@ export function parseData(value: DataView) {
 
 export async function supportsBluetooth() {
     if (!('bluetooth' in navigator)) {
-        console.log('Bluetooth is not Supported by this Browser.')
+        console.log('Bluetooth is not Supported by this Browser.');
         return false;
     }
-    console.log('Bluetooth is supported by this Browser.')
+    console.log('Bluetooth is supported by this Browser.');
     return await navigator.bluetooth.getAvailability();
 }
