@@ -93,6 +93,7 @@ class MonitorServerCallbacks: public BLEServerCallbacks {
 
 class CommandCharacteristicCallbacks: public BLECharacteristicCallbacks {
   void onWrite(BLECharacteristic* pCharacteristic) {
+    Serial.println("onWrite Callback Triggered");
     String value = pCharacteristic->getValue();
 
     if (value.length() > 0) {
@@ -129,6 +130,7 @@ void setup() {
   pMonitorCharacteristic->addDescriptor(new BLE2902());
 
   pCommandCharacteristic = pService->createCharacteristic(COMMAND_CHARACTERISTIC_UUID, BLECharacteristic::PROPERTY_WRITE);
+  pCommandCharacteristic->setCallbacks(new CommandCharacteristicCallbacks());
 
   pSummaryCharacteristic = pService->createCharacteristic(SUMMARY_CHARACTERISTIC_UUID, BLECharacteristic::PROPERTY_NOTIFY);
   pSummaryCharacteristic->addDescriptor(new BLE2902());
@@ -142,7 +144,7 @@ void setup() {
   pAdvertising->setMinPreferred(0x12);
   BLEDevice::startAdvertising();
 
-  Serial.println("BLE SErver Ready. Advertising as VitalSphereDevice");
+  Serial.println("BLE Server Ready. Advertising as VitalSphereDevice");
   Serial.println("Waiting for START command...");
 }
 
@@ -158,7 +160,6 @@ void loop() {
   switch (state) {
     case MEASURING_REST: {
       int val = analogRead(PULSE_PIN);
-      Serial.println(String(val) + "," + String(PULSE_THRESHOLD));
       if (val > PULSE_THRESHOLD && !flag) {
         beatsCounted++;
         flag = true;

@@ -26,6 +26,10 @@ export enum Tabs {
     DASHBOARD, TRAINING_SESSION, CONNECT_DEVICE, VITALS_SUMMARY, SETTINGS
 }
 
+export enum TrainingState {
+    IDLE, MEASURING_REST, TRAINING, HR_RECOVERY_WAIT, MEASURING_HR_RECOVERY
+}
+
 export const TabList = [
     { id: Tabs.DASHBOARD, name: 'Dashboard', icon: <RiDashboardHorizontalFill className='text-3xl me-6' />},
     { id: Tabs.TRAINING_SESSION, name: 'Training Session', icon: <FaRunning className='text-3xl me-6' />},

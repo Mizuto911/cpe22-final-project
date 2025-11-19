@@ -38,6 +38,12 @@ export async function stopMonitoring(char: BluetoothRemoteGATTCharacteristic) {
     await char.stopNotifications();
 }
 
+export async function changeTrainingState(cmdChar: BluetoothRemoteGATTCharacteristic, command: string) {
+    const encoder = new TextEncoder();
+    const value = encoder.encode(command);
+    await cmdChar.writeValue(value);
+}
+
 export function parseData(value: DataView) {
     const is16Bits = value.getUint8(0) & 0x1;
     return is16Bits ? value.getUint16(1, true) : value.getUint8(1);
