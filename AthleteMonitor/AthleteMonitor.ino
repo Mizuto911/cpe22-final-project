@@ -160,7 +160,6 @@ void loop() {
   switch (state) {
     case MEASURING_REST: {
       int val = analogRead(PULSE_PIN);
-      Serial.println(val);
       if (val > PULSE_THRESHOLD && !flag) {
         beatsCounted++;
         flag = true;
@@ -172,7 +171,7 @@ void loop() {
 
       if (now - stateStartMillis >= RESTING_MEASURE_MS) {
         restingHR = beatsCounted * 2;
-        Serial.printf("Resting HR: %d bpm\n", restingHR);
+        sendReading(restingHR);
         
         state = TRAINING;
         trainingStartMillis = now;
@@ -255,6 +254,21 @@ void loop() {
 
 float readTemperatureC() {
   return tempSensor.readT(); 
+}
+
+void sendReading(int bpm) {
+  if (deviceConnected) {
+    char buf[120];
+    snprintf(buf, sizeof(buf), "{\"resting_bpm\":%d}", bpm);
+
+    std::string payload(buf);
+    const char* c_str_payload = payload.c_str();
+    size_t len = payload.length();
+    pMonitorCharacteristic->setValue((const uint8_t*)c_str_payload, len);
+    pMonitorCharacteristic->notify();
+
+    Serial.printf("Resting HR: %d bpm\n", restingHR);
+  }
 }
 
 void sendReading(float tempC, int bpm) {

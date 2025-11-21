@@ -11,8 +11,8 @@ import clsx from 'clsx';
 interface MenuListProps {
     activeTab: Tabs
     setActive: Function
-    logOut: Function
     training: boolean
+    setLogOutConfirm: Function
 }
 
 const MenuList = (props: MenuListProps) => {
@@ -44,7 +44,7 @@ const MenuList = (props: MenuListProps) => {
     <ul className='mt-12'>
         {tabListElements}
         <li className={logOutClassName}
-            onClick={props.training ? () => {} : () => props.logOut()}>
+            onClick={props.training ? () => {} : () => props.setLogOutConfirm(true)}>
             <MdLogout className='text-3xl me-6' /> <span className='max-md:hidden'>Log Out</span>
         </li>
     </ul>

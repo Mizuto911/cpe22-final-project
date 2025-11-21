@@ -27,6 +27,7 @@ const page = () => {
   const [userData, setUserData] = useState(defaultUserDisplay);
   const [training, setTraining] = useState(false);
   const [isLoading, setLoading] = useState(true);
+  const [logOutConfirm, setLogOutConfirm] = useState(false);
   const [hasBluetooth, setHasBluetooth] = useState(false);
   const [monitorDevice, setMonitorDevice] = useState<BluetoothDevice | null>(null);
   const [monitorData, setMonitorData] = useState<BluetoothRemoteGATTCharacteristic | null>(null);
@@ -71,7 +72,7 @@ const page = () => {
   }
 
   return (
-    <ProtectedRoute>
+    
       <main className="flex flex-row max-w-screen max-h-screen overflow-y-hidden">
           <section className="bg-primary-content min-w-[300px] max-md:min-w-0 h-screen rounded-tr-2xl rounded-br-2xl shadow-xl overflow-y-auto max-h-screen">
             <div className="flex flex-row gap-3 items-center p-4.5 mb-10">
@@ -79,7 +80,8 @@ const page = () => {
                 <h2 className="font-bold text-2xl text-primary max-md:hidden">Vital Sphere</h2>
             </div>
               <UserMenuItem userData={userData} />
-              <MenuList setActive={setActiveTab} activeTab={activeTab} logOut={logOut} training={training}/>
+              <MenuList setActive={setActiveTab} activeTab={activeTab} training={training}
+                  setLogOutConfirm={setLogOutConfirm}/>
           </section>
           <section className="w-full min-h-screen bg-base-200">
               <header className="flex flex-row justify-between items-center p-4 shadow-sm shadow-gray-200 w-full h-16">
@@ -95,8 +97,22 @@ const page = () => {
           {isLoading && <div className="fixed top-0 bottom-0 w-screen h-screen grid place-content-center bg-[rgba(0,0,0,0.5)]">
                     <div className={`loading loading-spinner loading-xl text-primary mb-4`}></div>
                 </div>}
+          {logOutConfirm && <section className="fixed top-0 bottom-0 w-screen h-screen grid place-content-center bg-[rgba(0,0,0,0.5)] fade-in">
+            <div className="min-w-[250px] w-[25vw] h-[160px] rounded-xl bg-base-200 p-4 flex flex-col items-center justify-between">
+              <div className="flex flex-col items-center">
+                <h2 className="font-bold text-xl text-primary mb-3">
+                  Log Out 
+                </h2>
+                <p>Are you sure you want to log out?</p>
+              </div>
+              <div>
+                <button onClick={() => setLogOutConfirm(false)} className="btn btn-soft p-2 rounded-lg me-6" >Cancel</button> 
+                <button onClick={logOut} className="btn btn-soft btn-error p-2 rounded-lg">Log Out</button>
+              </div>
+            </div>
+          </section>}
       </main>
-    </ProtectedRoute>
+    
   )
 }
 

@@ -101,6 +101,12 @@ const TrainingSession = (props: TrainingSessionProps) => {
         console.log('Start Command Sent');
       }
     }
+    else if (trainingState === TrainingState.TRAINING) {
+      if (props.commandSend) {
+        await changeTrainingState(props.commandSend, 'STOP');
+        console.log('Stop Command Sent');
+      }   
+    }
   }
 
   function handleMonitorNotifs(event: Event) {
@@ -117,8 +123,14 @@ const TrainingSession = (props: TrainingSessionProps) => {
 
     try {
       const dataObj = JSON.parse(dataString);
-      setBpmContent(dataObj.bpm);
-      setTempContent(dataObj.temp_c);
+
+      if (dataObj.resting_bpm) {
+        setTrainingState(TrainingState.TRAINING);
+      }
+      else {
+        setBpmContent(dataObj.bpm);
+        setTempContent(dataObj.temp_c);
+      }
     }
     catch (e) {
       console.log(`Error Parsing Data: ${e}`)
