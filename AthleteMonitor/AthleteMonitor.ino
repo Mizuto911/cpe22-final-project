@@ -11,8 +11,8 @@
 #define COMMAND_CHARACTERISTIC_UUID "2eb13ad7-2b5f-4aec-ab5f-7b97adfd64fd"
 #define SUMMARY_CHARACTERISTIC_UUID "067dcd65-ab22-4b60-be7f-9597a279b304"
 
-const int PULSE_PIN = 34; 
-const int PULSE_THRESHOLD = 3250;
+const int PULSE_PIN = 27; 
+const int PULSE_THRESHOLD = 2100;
 bool flag = false;
 
 const unsigned long RESTING_MEASURE_MS = 30000;
@@ -110,7 +110,7 @@ class CommandCharacteristicCallbacks: public BLECharacteristicCallbacks {
 void setup() {
   Serial.begin(115200);
   delay(100);
-  Wire.begin(21, 22);
+  Wire.begin(13, 14);
 
   tempSensor.begin(MAX30205_ADDR); 
   Serial.println("MAX30205 initialized with ClosedCube library.");
@@ -160,6 +160,7 @@ void loop() {
   switch (state) {
     case MEASURING_REST: {
       int val = analogRead(PULSE_PIN);
+      Serial.println(val);
       if (val > PULSE_THRESHOLD && !flag) {
         beatsCounted++;
         flag = true;
