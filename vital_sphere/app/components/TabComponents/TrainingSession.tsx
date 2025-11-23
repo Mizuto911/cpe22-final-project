@@ -2,7 +2,7 @@
 import { MdBluetoothDisabled } from "react-icons/md";
 import { useState, useEffect, useRef } from "react";
 import { Tabs, TrainingState } from "@/app/modules/DataTypes";
-import { startMonitoring, stopMonitoring, changeTrainingState } from "@/app/modules/UtilityModules";
+import { startMonitoring, stopMonitoring, changeTrainingState, uploadMeasurement, uploadFatigueData } from "@/app/modules/UtilityModules";
 import clsx from "clsx";
 
 interface TrainingSessionProps {
@@ -18,21 +18,27 @@ interface TrainingSessionProps {
 const TrainingSession = (props: TrainingSessionProps) => {
 
   const [trainingState, setTrainingState] = useState(TrainingState.IDLE);
-  const [bpmContent, setBpmContent] = useState(0);
-  const [tempContent, setTempContent] = useState(0);
+  const [bpmContent, setBpmContent] = useState<number | null>(null);
+  const [tempContent, setTempContent] = useState<number | null>(null);
+  const [rhhContent, setRhhContent] = useState<number | null>(null);
+  const [hrrContent, setHrrContent] = useState<number | null>(null);
+  const [overworked, setOverworked] = useState<boolean | null>(null);
+  const [fatigueRisk, setFatigueRisk] = useState<boolean | null>(null);
   const [timer, setTimer] = useState(30);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
-  const indicatorContent = props.training ? getTrainingContent() : 'Bluetooth device is connected. You may start your training session.'
-
-  const buttonContent = props.training ? 'Stop Training Session' : 'Start Training Session';
-  const buttonClassName = clsx('btn mt-15 rounded-lg', props.training ? 'btn-error' : 'btn-info');
+  const indicatorContent = props.training ? getTrainingContent() : 'Bluetooth device is connected. You may start your training session.';
 
   useEffect(() => {
-    if (props.monitorData)
-      props.monitorData.addEventListener('characteristicvaluechanged', handleMonitorNotifs);
-  
-  }, [props.monitorData, props.summaryData])
+    props.monitorData?.addEventListener('characteristicvaluechanged', handleMonitorNotifs);
+    props.summaryData?.addEventListener('characteristicvaluechanged', handleSummaryNotifs);
+
+    return () => {
+      props.monitorData?.removeEventListener('characteristicvaluechanged', handleMonitorNotifs);
+      props.summaryData?.removeEventListener('characteristicvaluechanged', handleSummaryNotifs);
+    }
+
+  }, [props.monitorData, props.summaryData]);
 
   useEffect(() => {
     const removeInterval = () => {
@@ -42,22 +48,31 @@ const TrainingSession = (props: TrainingSessionProps) => {
       }
     }
 
-    if (trainingState === TrainingState.MEASURING_REST) {
+    const startInterval = () => {
       if (intervalRef.current) {
-        clearInterval(intervalRef.current);
+        removeInterval();
       }
-
       intervalRef.current = setInterval(() => {
         setTimer(prevTimer => prevTimer - 1);
       }, 1000);
     }
-    else if (trainingState === TrainingState.TRAINING) {
-      removeInterval();
+
+    switch (trainingState) {
+
+      case TrainingState.MEASURING_REST:
+      case TrainingState.HR_RECOVERY_WAIT:
+      case TrainingState.MEASURING_HR_RECOVERY:
+        startInterval();
+        break;
+
+      case TrainingState.TRAINING:
+      case TrainingState.STOPPED:
+        removeInterval();
+        break;
     }
 
-    return () => {
-      removeInterval();
-    };
+    return () => removeInterval();
+
   }, [trainingState]);
 
   function getTrainingContent() {
@@ -78,6 +93,25 @@ const TrainingSession = (props: TrainingSessionProps) => {
           Training Started. Live Data of your Vitals will be updated every 10 seconds.&nbsp;
           <span className="loading loading-spinner text-primary"></span>
         </>;
+
+      case TrainingState.HR_RECOVERY_WAIT:
+        if (timer <= 0) {
+          setTimer(10);
+          setTrainingState(TrainingState.MEASURING_HR_RECOVERY);
+        }
+        return `Rest for ${timer} seconds. We will measure your Heart Rate Recovery.`;
+
+      case TrainingState.MEASURING_HR_RECOVERY:
+        if (timer <= 0) {
+          setTimer(30);
+        }
+        return <>
+          Measuring your Heart Rate Recovery. Please wait {timer} seconds.&nbsp;
+          <span className="loading loading-spinner text-primary"></span>
+        </>;
+
+      case TrainingState.STOPPED:
+        return 'Training Session Complete. The following are the Results.';
     }
   }
 
@@ -93,7 +127,7 @@ const TrainingSession = (props: TrainingSessionProps) => {
 
       if (props.summaryData){
         await startMonitoring(props.summaryData);
-        console.log('Subscribed to Monitor Notifications');
+        console.log('Subscribed to Summary Notifications');
       }
         
       if(props.commandSend){
@@ -105,16 +139,15 @@ const TrainingSession = (props: TrainingSessionProps) => {
       if (props.commandSend) {
         await changeTrainingState(props.commandSend, 'STOP');
         console.log('Stop Command Sent');
+        setTrainingState(TrainingState.HR_RECOVERY_WAIT);
       }   
     }
   }
 
-  function handleMonitorNotifs(event: Event) {
+  async function handleMonitorNotifs(event: Event) {
     const decoder = new TextDecoder();
     const char = event.target as BluetoothRemoteGATTCharacteristic | null;
     const value = char?.value;
-    
-    console.log(value);
     
     if (!value) return;
 
@@ -128,12 +161,71 @@ const TrainingSession = (props: TrainingSessionProps) => {
         setTrainingState(TrainingState.TRAINING);
       }
       else {
+        const assessment = await uploadMeasurement({bpm: dataObj.bpm, temperature: dataObj.temp_c});
         setBpmContent(dataObj.bpm);
         setTempContent(dataObj.temp_c);
+
+        if (!assessment || !assessment.ok) {
+          // TODO: Error
+          console.log('There was a Problem uploading the Data');
+          return;
+        }
+        
+        setOverworked(assessment.overworked);
       }
     }
     catch (e) {
       console.log(`Error Parsing Data: ${e}`)
+    }
+  }
+
+  async function handleSummaryNotifs(event: Event) {
+    const decoder = new TextDecoder();
+    const char = event.target as BluetoothRemoteGATTCharacteristic | null;
+    const value = char?.value;
+
+    if (!value) return;
+
+    const dataArray = new Uint8Array(value?.buffer);
+    const dataString = decoder.decode(dataArray);
+
+    try {
+      const dataObj = JSON.parse(dataString);
+      setRhhContent(dataObj.summary.resting_hr);
+      setHrrContent(dataObj.summary.recovery);
+
+      const assessment = await uploadFatigueData({
+        train_time: dataObj.summary.training_s,
+        rhh: dataObj.summary.resting_hr,
+        hrr: dataObj.summary.recovery
+      });
+
+      if (!assessment || !assessment.ok) {
+          // TODO: Error
+          console.log('There was a Problem uploading the Data');
+          return;
+      }
+
+      setFatigueRisk(assessment.fatigue_risk);
+      setTrainingState(TrainingState.STOPPED)
+    }
+    catch (e) {
+      console.log(`Error Parsing Data: ${e}`);
+    }
+
+    setTimeout(() => {
+      props.setTraining(false);
+      setTrainingState(TrainingState.IDLE);
+    }, 3000);
+
+    if (props.monitorData) {
+      await stopMonitoring(props.monitorData);
+      console.log('Unsubscribed from Monitor Notifications.');
+    } 
+
+    if (props.summaryData) {
+      await stopMonitoring(props.summaryData);
+      console.log('Unsubscribed from Summary Notifications');
     }
   }
 
@@ -150,18 +242,22 @@ const TrainingSession = (props: TrainingSessionProps) => {
               <ul className='mt-5 mb-8'>
                 <li className='flex flex-row justify-between px-6 mb-2'>
                   <span className='text-xl'>Heart Rate:</span>
-                  <span className='text-xl text-secondary'>{bpmContent} BPM</span>
+                  <span className='text-xl text-secondary'>{bpmContent !== null ? bpmContent : '--'} BPM</span>
                 </li>
                 <li className='flex flex-row justify-between px-6 mb-2'>
                   <span className='text-xl'>Body Temperature:</span>
-                  <span className='text-xl text-secondary'>{tempContent}&deg;C</span>
+                  <span className='text-xl text-secondary'>{tempContent !== null ? tempContent : '--'}&deg;C</span>
                 </li>
                 <li className='flex flex-row justify-between px-6 mb-2'>
                   <span className='text-xl'>Training Time:</span>
                   <span className='text-xl text-secondary'>00:00:00</span>
                 </li>
               </ul>
-              <p className='text-lg text-center mb-5'>All readings are updated<br/>in real time.</p>
+              <p className='text-lg text-start mb-5'>
+                Assessment: <span className={clsx('font-bold', overworked === null ? 'text-black' : overworked ? 'text-error' : 'text-success')}>
+                  {overworked === null ? '----' : overworked ? 'OVERWORKED' : 'NORMAL'}
+                </span>
+              </p>
             </article>
 
             <article className='w-[30%] min-w-[300px] max-w-[400px] bg-base-200 shadow-xl rounded-xl border-gray-200 border-1 max-lg:w-full max-lg:max-w-none'>
@@ -172,20 +268,25 @@ const TrainingSession = (props: TrainingSessionProps) => {
                   <span className='text-xl text-accent'>00:00:00</span>
                 </li>
                 <li className='flex flex-row justify-between px-6 mb-2'>
-                  <span className='text-xl'>Max Heart Rate:</span>
-                  <span className='text-xl text-accent'>0 BPM</span>
+                  <span className='text-xl'>Resting Heart Rate:</span>
+                  <span className='text-xl text-accent'>{rhhContent !== null ? rhhContent : '--'} BPM</span>
                 </li>
                 <li className='flex flex-row justify-between px-6 mb-2'>
-                  <span className='text-xl'>Body Temp Range:</span>
-                  <span className='text-xl text-accent'>0&deg;C</span>
+                  <span className='text-xl'>Heart Rate Recovery:</span>
+                  <span className='text-xl text-accent'>{hrrContent !== null ? hrrContent : '--'} BPM</span>
                 </li>
               </ul>
-              <p className='text-lg text-center mb-5'>All readings are updated<br/>in real time.</p>
+              <p className='text-lg text-start mb-5'>
+                Fatigue Risk: <span className={clsx('font-bold', fatigueRisk === null ? 'text-black' : fatigueRisk ? 'text-error' : 'text-success')}>
+                  {fatigueRisk === null ? '----' : fatigueRisk ? 'DETECTED' : 'NONE'}
+                </span>
+              </p>
             </article>
 
           </section>
 
-          <button className={buttonClassName} onClick={handleTraining}>{buttonContent}</button>
+          <button className={clsx('btn mt-15 rounded-lg', props.training ? 'btn-error' : 'btn-info')} 
+              onClick={handleTraining}>{props.training ? 'Stop Training Session' : 'Start Training Session'}</button>
         </> :
         <div className="w-full h-[calc(100vh-4rem)] flex flex-col justify-center items-center">
           <MdBluetoothDisabled className="text-gray-400 text-[clamp(10rem,20vw,15rem)]" />

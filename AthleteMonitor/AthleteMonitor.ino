@@ -205,6 +205,7 @@ void loop() {
 
     case STOPPED:
       state = HR_RECOVERY_WAIT;
+      stateStartMillis = now;
       Serial.println("Please Wait One Minute!");
       break;
 

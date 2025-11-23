@@ -1,13 +1,13 @@
 'use client'
 import { useState, FormEvent, useContext } from "react";
 import { DayPicker } from "react-day-picker";
-import { hasEmptyFields } from "../modules/UtilityModules";
+import { hasEmptyFields, formatDateToISOStringLocally } from "../modules/UtilityModules";
 import { Tooltip } from "react-tooltip";
 import { bdayDoubtMessage, genderDoubtMessage } from '../modules/long_strings'
 import Image from "next/image";
 import "react-day-picker/style.css";
 import AuthContext from "../context/AuthContext";
-import style from './Forms.module.css'
+import style from './Forms.module.css';
 
 const RegistrationForm = () => {
     const { register } = useContext(AuthContext);
@@ -35,7 +35,7 @@ const RegistrationForm = () => {
             setLoading(true);
         }
 
-        formData.append('birthday', birthDay.toISOString().split('T')[0]);
+        formData.append('birthday', formatDateToISOStringLocally(birthDay));
 
         const successfulRegister = await register(formData);
 

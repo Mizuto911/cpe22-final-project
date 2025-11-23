@@ -15,12 +15,18 @@ def get_measurements(db: db_dependency, user: user_dependency):
     return db.query(Measurement).filter(Measurement.user_id == user.get('id')).all()
 
 @router.post('/', status_code=status.HTTP_201_CREATED, response_model=OverworkAssessment)
-def record_measurement(db: db_dependency, user: user_dependency, measurement: MeasurementRecord, user_object: user_object_dependency):
+def record_measurement(db: db_dependency, user: user_dependency, measurement: MeasurementRecord, user_object: user_object_dependency): 
     db_measurement = Measurement(**measurement.model_dump(), user_id=user.get('id'))
     db.add(db_measurement)
-    db.commit()
-    db.refresh(db_measurement)
-    return {'data': db_measurement, 'overworked': is_abnormal_reading(measurement, user_object)}
+
+    try:
+        db.commit()
+        db.refresh(db_measurement)
+        return {'data': db_measurement, 'overworked': is_abnormal_reading(measurement, user_object)}
+    
+    except Exception as e:
+        db.rollback()
+        return {'message': f'An Unexpected Error Occured: {e}'}
 
 @router.delete('/')
 def delete_measurement(db: db_dependency, user: user_dependency, measurement_id: int):

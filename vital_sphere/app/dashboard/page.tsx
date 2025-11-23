@@ -14,6 +14,8 @@ import AuthContext from "../context/AuthContext";
 import ProtectedRoute from "../components/ProtectedRoute";
 import { UserData } from "../modules/DataTypes";
 import { supportsBluetooth } from "@/app/modules/UtilityModules";
+import style from "./dashboard.module.css";
+import clsx from 'clsx';
 
 const defaultUserDisplay: UserData = {
   id: 0,
@@ -72,7 +74,7 @@ const page = () => {
   }
 
   return (
-    
+    <ProtectedRoute>
       <main className="flex flex-row max-w-screen max-h-screen overflow-y-hidden">
           <section className="bg-primary-content min-w-[300px] max-md:min-w-0 h-screen rounded-tr-2xl rounded-br-2xl shadow-xl overflow-y-auto max-h-screen">
             <div className="flex flex-row gap-3 items-center p-4.5 mb-10">
@@ -97,7 +99,7 @@ const page = () => {
           {isLoading && <div className="fixed top-0 bottom-0 w-screen h-screen grid place-content-center bg-[rgba(0,0,0,0.5)]">
                     <div className={`loading loading-spinner loading-xl text-primary mb-4`}></div>
                 </div>}
-          {logOutConfirm && <section className="fixed top-0 bottom-0 w-screen h-screen grid place-content-center bg-[rgba(0,0,0,0.5)] fade-in">
+          {logOutConfirm && <section className={clsx('fixed top-0 bottom-0 w-screen h-screen grid place-content-center bg-[rgba(0,0,0,0.5)]', style.fadeIn)}>
             <div className="min-w-[250px] w-[25vw] h-[160px] rounded-xl bg-base-200 p-4 flex flex-col items-center justify-between">
               <div className="flex flex-col items-center">
                 <h2 className="font-bold text-xl text-primary mb-3">
@@ -106,13 +108,13 @@ const page = () => {
                 <p>Are you sure you want to log out?</p>
               </div>
               <div>
-                <button onClick={() => setLogOutConfirm(false)} className="btn btn-soft p-2 rounded-lg me-6" >Cancel</button> 
-                <button onClick={logOut} className="btn btn-soft btn-error p-2 rounded-lg">Log Out</button>
+                <button onClick={() => setLogOutConfirm(false)} className="btn btn-outline p-2 rounded-lg me-6" >Cancel</button> 
+                <button onClick={logOut} className="btn btn-outline btn-error p-2 rounded-lg">Log Out</button>
               </div>
             </div>
           </section>}
       </main>
-    
+    </ProtectedRoute>
   )
 }
 

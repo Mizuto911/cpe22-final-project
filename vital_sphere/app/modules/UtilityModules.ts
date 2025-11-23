@@ -2,6 +2,13 @@ export function hasEmptyFields(formData: FormData): boolean {
     return !formData.get('username') || !formData.get('password');
 }
 
+export const formatDateToISOStringLocally = (date: Date) => {
+    const year = date.getFullYear();
+    const month = (date.getMonth() + 1).toString().padStart(2, '0');
+    const day = date.getDate().toString().padStart(2, '0');
+    return `${year}-${month}-${day}`;
+};
+
 export async function connectDevice(device: BluetoothDevice) {
     if (!device.gatt) return;
     if (device.gatt.connected) return;
@@ -54,6 +61,54 @@ export async function supportsBluetooth() {
         console.log('Bluetooth is not Supported by this Browser.');
         return false;
     }
-    console.log('Bluetooth is supported by this Browser.');
-    return await navigator.bluetooth.getAvailability();
+    const available = await navigator.bluetooth.getAvailability();
+    if (available)
+        console.log('Bluetooth is supported by this Browser.');
+    return available;
+}
+
+export async function uploadMeasurement(measurement: object) {
+    const response = await fetch('http://localhost:8000/measurements/', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json', 'Authorization': `Bearer ${localStorage.getItem('token')}`},
+        body: JSON.stringify(measurement)
+    });
+
+    try {
+        if (response.ok) {
+            const data = await response.json();
+            return {ok: true, overworked: data.overworked};
+        }
+        else {
+            const error = await response.json();
+            return {ok: false, message: error.message};
+        }
+    }
+    catch (e) {
+        console.log(`Measurement Upload Failed: ${e}`);
+        return {ok: false, message: 'Unable to Connect to Server'};
+    }
+}
+
+export async function uploadFatigueData(fatigueData: object) {
+    const response = await fetch('http://localhost:8000/fatiguedata/', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json', 'Authorization': `Bearer ${localStorage.getItem('token')}`},
+        body: JSON.stringify(fatigueData)
+    });
+
+    try {
+        if (response.ok) {
+            const data = await response.json();
+            return {ok: true, fatigue_risk: data.fatigue_risk};
+        }
+        else {
+            const error = await response.json();
+            return {ok: false, message: error.message};
+        }
+    }
+    catch (e) {
+        console.log(`Measurement Upload Failed: ${e}`);
+        return {ok: false, message: 'Unable to Connect to Server'};
+    }
 }

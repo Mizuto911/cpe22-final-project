@@ -1,0 +1,20 @@
+.fadeIn {
+    animation-name: logOutBGFade;
+    animation-timing-function: ease-in-out;
+    animation-duration: 300ms;
+    animation-fill-mode: forwards;
+    animation-iteration-count: 1;
+    opacity: 0;
+    transform: translateY(5px);
+}
+
+@keyframes logOutBGFade {
+    0% {
+        opacity: 0;
+        transform: translateY(5px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
