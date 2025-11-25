@@ -1,6 +1,7 @@
 #include <Wire.h>
-#include <Preferences.h> 
 #include <ClosedCube_MAX30205.h>
+#include <MAX30105.h>
+#include <heartRate.h>
 #include <BLEDevice.h>
 #include <BLEServer.h>
 #include <BLEUtils.h>
@@ -11,17 +12,13 @@
 #define COMMAND_CHARACTERISTIC_UUID "2eb13ad7-2b5f-4aec-ab5f-7b97adfd64fd"
 #define SUMMARY_CHARACTERISTIC_UUID "067dcd65-ab22-4b60-be7f-9597a279b304"
 
-const int PULSE_PIN = 27; 
-const int PULSE_THRESHOLD = 2100;
-bool flag = false;
-
-const unsigned long RESTING_MEASURE_MS = 30000;
-const unsigned long SAMPLE_INTERVAL_MS = 10000;
+const unsigned long MEASURE_WINDOW_MS = 30000;
+const unsigned long SAMPLE_INTERVAL_MS = 1000;
 
 #define MAX30205_ADDR 0x48
 
-Preferences prefs;
 ClosedCube_MAX30205 tempSensor;
+MAX30105 heartRateSensor;
 
 BLEServer* pServer = NULL;
 BLECharacteristic* pMonitorCharacteristic = NULL;
@@ -36,13 +33,19 @@ unsigned long stateStartMillis = 0;
 unsigned long trainingStartMillis = 0;
 unsigned long lastSampleMillis = 0;
 
+#define BPM_ARRAY_SIZE 30
+
+long lastBeatTime = 0;
+int bpm = 0;
+byte bpmArray[BPM_ARRAY_SIZE];
+byte bpmSpot = 0;
+
 int restingHR = 0;
 int hr_after_ex = 0;
 int hr_after_1min = 0;
 
-int beatsCounted = 0;
-
 float readTemperatureC();
+void sendReading(int bpm);
 void sendReading(float tempC, int bpm);
 void sendSummary(unsigned long training_s, int resting, int hr_after, int hr_1min, int recovery);
 
@@ -55,22 +58,13 @@ void handleCommand(std::string cmd) {
   if (command.equalsIgnoreCase("START") && state == IDLE) {
     state = MEASURING_REST;
     stateStartMillis = now;
-    beatsCounted = 0;
     Serial.println("Measuring Resting HR for 30 seconds...");
   }
   else if (command.equalsIgnoreCase("STOP") && state == TRAINING) {
     state = STOPPED;
     Serial.println("STOP Received, Stopping training and calculating HR after exercise.");
-
-    int bpm_window = 0;
-    if (beatsCounted > 0) {
-      unsigned long windowDuration = now - lastSampleMillis;
-      float windowSeconds = windowDuration / 1000.0f;
-      bpm_window = (int)((float)beatsCounted*(60.0f/windowSeconds));
-    }
-    hr_after_ex = bpm_window;
+    hr_after_ex = bpm;
     Serial.printf("HR After Exercise (last window): %d bpm\n", hr_after_ex);
-    beatsCounted = 0;
     Serial.println("Waiting 1 min for HR Recovery...");
   }
   else {
@@ -112,13 +106,9 @@ void setup() {
   delay(100);
   Wire.begin(13, 14);
 
-  tempSensor.begin(MAX30205_ADDR); 
+  tempSensor.begin(MAX30205_ADDR);
+  heartRateSensor.begin(Wire, I2C_SPEED_FAST);
   Serial.println("MAX30205 initialized with ClosedCube library.");
-  
-  prefs.begin("trainer_data", false);
-  unsigned long storedDuration = prefs.getULong("total_train_s", 0);
-  Serial.printf("Total stored training duration: %lu seconds\n", storedDuration);
-  prefs.end();
 
   BLEDevice::init("VitalSphereDevice");
   pServer = BLEDevice::createServer();
@@ -144,6 +134,10 @@ void setup() {
   pAdvertising->setMinPreferred(0x12);
   BLEDevice::startAdvertising();
 
+  heartRateSensor.setup();
+  heartRateSensor.setPulseAmplitudeRed(0x0A);
+  heartRateSensor.setPulseAmplitudeGreen(0);
+
   Serial.println("BLE Server Ready. Advertising as VitalSphereDevice");
   Serial.println("Waiting for START command...");
 }
@@ -159,46 +153,49 @@ void loop() {
 
   switch (state) {
     case MEASURING_REST: {
-      int val = analogRead(PULSE_PIN);
-      if (val > PULSE_THRESHOLD && !flag) {
-        beatsCounted++;
-        flag = true;
-        Serial.println("Beat Counted: " + String(beatsCounted));
-      }
-      else if (val < PULSE_THRESHOLD) {
-        flag = false;
+      long irValue = heartRateSensor.getIR();
+
+      if (checkForBeat(irValue)) {
+        long delta = now - lastBeatTime;
+        lastBeatTime = now;
+
+        bpm = 60 / (delta/1000.0);
+
+        if (bpm < 255 && bpm > 20) {
+          bpmArray[bpmSpot] = bpm;
+          bpmSpot = (bpmSpot + 1) % BPM_ARRAY_SIZE;
+        }
+
+        Serial.println("Beat Counted!");
       }
 
-      if (now - stateStartMillis >= RESTING_MEASURE_MS) {
-        restingHR = beatsCounted * 2;
+      if (now - stateStartMillis >= MEASURE_WINDOW_MS) {
+        restingHR = getBPMAverage(bpmArray);
         sendReading(restingHR);
         
         state = TRAINING;
         trainingStartMillis = now;
         stateStartMillis = now; 
         lastSampleMillis = now - SAMPLE_INTERVAL_MS; 
-        beatsCounted = 0;
         Serial.println("Training started. Sending 10s readings...");
       }
     } break;
 
     case TRAINING: {
-      int val = analogRead(PULSE_PIN);
-      if (val > PULSE_THRESHOLD && !flag) {
-        beatsCounted++;
-        flag = true;
-        Serial.println("Beat Counted: " + String(beatsCounted));
-      }
-      else if (val < PULSE_THRESHOLD) {
-        flag = false;
+      long irValue = heartRateSensor.getIR();
+
+      if (checkForBeat(irValue)) {
+        long delta = now - lastBeatTime;
+        lastBeatTime = now;
+
+        bpm = 60 / (delta/1000.0);
+
+        Serial.println("Beat Counted!");
       }
 
       if (now - lastSampleMillis >= SAMPLE_INTERVAL_MS) {
-        int bpm = beatsCounted * 6; 
         float temp = readTemperatureC();
         sendReading(temp, bpm);
-        
-        beatsCounted = 0; 
         lastSampleMillis = now;
       }
     } break;
@@ -206,44 +203,46 @@ void loop() {
     case STOPPED:
       state = HR_RECOVERY_WAIT;
       stateStartMillis = now;
-      Serial.println("Please Wait One Minute!");
+      Serial.println("Starting Resting Period of HR Recovery measurement...");
       break;
 
     case HR_RECOVERY_WAIT:
       if (now - stateStartMillis >= 60000) { 
-        beatsCounted = 0;
         stateStartMillis = now;
         state = HR_RECOVERY_MEASURE;
+        lastBeatTime = now;
+        bpmSpot = 0;
         Serial.println("Starting 10s HR recovery measurement...");
       }
       break;
 
     case HR_RECOVERY_MEASURE: {
-      int val = analogRead(PULSE_PIN);
-      if (val > PULSE_THRESHOLD && !flag) {
-        beatsCounted++;
-        flag = true;
-        Serial.println("Beat Counted: " + String(beatsCounted));
-      }
-      else if (val < PULSE_THRESHOLD) {
-        flag = false;
+      long irValue = heartRateSensor.getIR();
+
+      if (checkForBeat(irValue)) {
+        long delta = now - lastBeatTime;
+        lastBeatTime = now;
+
+        bpm = 60 / (delta / 1000.0);
+
+        if (bpm < 255 && bpm > 20) {
+          bpmArray[bpmSpot] = bpm;
+          bpmSpot = (bpmSpot + 1) % BPM_ARRAY_SIZE;
+        }
+
+        Serial.println("Beat Counted!");
       }
 
-      if (now - stateStartMillis >= SAMPLE_INTERVAL_MS) { 
-        hr_after_1min = beatsCounted * 6; 
+      if (now - stateStartMillis >= MEASURE_WINDOW_MS) { 
+        hr_after_1min = getBPMAverage(bpmArray); 
         int recovery = hr_after_ex - hr_after_1min;
         
         unsigned long total_training_duration_ms = now - trainingStartMillis;
         unsigned long training_s = total_training_duration_ms / 1000;
-        
-        prefs.begin("trainer_data", false);
-        unsigned long storedDuration = prefs.getULong("total_train_s", 0);
-        prefs.putULong("total_train_s", storedDuration + training_s);
-        prefs.end();
 
         sendSummary(training_s, restingHR, hr_after_ex, hr_after_1min, recovery);
         state = IDLE;
-        Serial.println("Training session complete. Preferences updated.");
+        Serial.println("Training session complete.");
       }
     } break;
 
@@ -265,10 +264,10 @@ void sendReading(int bpm) {
     std::string payload(buf);
     const char* c_str_payload = payload.c_str();
     size_t len = payload.length();
-    pMonitorCharacteristic->setValue((const uint8_t*)c_str_payload, len);
+    pMonitorCharacteristic->setValue((const uint8_t*)c_str_payload, len + 1);
     pMonitorCharacteristic->notify();
 
-    Serial.printf("Resting HR: %d bpm\n", restingHR);
+    Serial.printf("Resting HR: %d bpm\n", bpm);
   }
 }
 
@@ -280,7 +279,7 @@ void sendReading(float tempC, int bpm) {
     std::string payload(buf);
     const char* c_str_payload = payload.c_str();
     size_t len = payload.length();
-    pMonitorCharacteristic->setValue((const uint8_t*)c_str_payload, len);
+    pMonitorCharacteristic->setValue((const uint8_t*)c_str_payload, len + 1);
     pMonitorCharacteristic->notify();
 
     Serial.printf("[TX DATA] %s\n", buf);
@@ -298,10 +297,17 @@ void sendSummary(unsigned long training_s, int resting, int hr_after, int hr_1mi
     std::string payload(buf);
     const char* c_str_payload = payload.c_str();
     size_t len = payload.length();
-    pSummaryCharacteristic->setValue((const uint8_t*)c_str_payload, len);
+    pSummaryCharacteristic->setValue((const uint8_t*)c_str_payload, len + 1);
     pSummaryCharacteristic->notify();
     
     Serial.printf("[TX SUMMARY] %s\n", buf);
   }
-  
+}
+
+int getBPMAverage(byte bpmArray[]) {
+  int sum = 0;
+  for (byte i = 0; i < BPM_ARRAY_SIZE; i++) {
+    sum += bpmArray[i];
+  }
+  return sum / BPM_ARRAY_SIZE;
 }

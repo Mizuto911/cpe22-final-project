@@ -2,8 +2,10 @@
 import { MdBluetoothDisabled } from "react-icons/md";
 import { useState, useEffect, useRef } from "react";
 import { Tabs, TrainingState } from "@/app/modules/DataTypes";
-import { startMonitoring, stopMonitoring, changeTrainingState, uploadMeasurement, uploadFatigueData } from "@/app/modules/UtilityModules";
+import { startMonitoring, stopMonitoring, changeTrainingState, 
+  uploadMeasurement, uploadFatigueData, decodeBluetoothData } from "@/app/modules/UtilityModules";
 import clsx from "clsx";
+import style from '../Forms.module.css';
 
 interface TrainingSessionProps {
   device: BluetoothDevice | null
@@ -24,6 +26,7 @@ const TrainingSession = (props: TrainingSessionProps) => {
   const [hrrContent, setHrrContent] = useState<number | null>(null);
   const [overworked, setOverworked] = useState<boolean | null>(null);
   const [fatigueRisk, setFatigueRisk] = useState<boolean | null>(null);
+  const [errorMessage, setErrorMessage] = useState('');
   const [timer, setTimer] = useState(30);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -145,73 +148,44 @@ const TrainingSession = (props: TrainingSessionProps) => {
   }
 
   async function handleMonitorNotifs(event: Event) {
-    const decoder = new TextDecoder();
-    const char = event.target as BluetoothRemoteGATTCharacteristic | null;
-    const value = char?.value;
-    
-    if (!value) return;
 
-    const dataArray = new Uint8Array(value?.buffer);
-    const dataString = decoder.decode(dataArray);
+    const data = decodeBluetoothData(event.target as BluetoothRemoteGATTCharacteristic);
 
-    try {
-      const dataObj = JSON.parse(dataString);
-
-      if (dataObj.resting_bpm) {
-        setTrainingState(TrainingState.TRAINING);
-      }
-      else {
-        const assessment = await uploadMeasurement({bpm: dataObj.bpm, temperature: dataObj.temp_c});
-        setBpmContent(dataObj.bpm);
-        setTempContent(dataObj.temp_c);
-
-        if (!assessment || !assessment.ok) {
-          // TODO: Error
-          console.log('There was a Problem uploading the Data');
-          return;
-        }
-        
-        setOverworked(assessment.overworked);
-      }
+    if (data.resting_bpm) {
+      setTrainingState(TrainingState.TRAINING);
     }
-    catch (e) {
-      console.log(`Error Parsing Data: ${e}`)
+    else {
+      const assessment = await uploadMeasurement({bpm: data.bpm, temperature: data.temp_c});
+      setBpmContent(data.bpm);
+      setTempContent(data.temp_c);
+      if (!assessment || !assessment.ok) {
+        showError('There was a Problem uploading the Data');
+        return;
+      }
+      setOverworked(assessment.overworked);
     }
   }
 
   async function handleSummaryNotifs(event: Event) {
-    const decoder = new TextDecoder();
-    const char = event.target as BluetoothRemoteGATTCharacteristic | null;
-    const value = char?.value;
+    
+    const data = decodeBluetoothData(event.target as BluetoothRemoteGATTCharacteristic);
 
-    if (!value) return;
+    setRhhContent(data.summary.resting_hr);
+    setHrrContent(data.summary.recovery);
 
-    const dataArray = new Uint8Array(value?.buffer);
-    const dataString = decoder.decode(dataArray);
+    const assessment = await uploadFatigueData({
+      train_time: data.summary.training_s,
+      rhh: data.summary.resting_hr,
+      hrr: data.summary.recovery
+    });
 
-    try {
-      const dataObj = JSON.parse(dataString);
-      setRhhContent(dataObj.summary.resting_hr);
-      setHrrContent(dataObj.summary.recovery);
-
-      const assessment = await uploadFatigueData({
-        train_time: dataObj.summary.training_s,
-        rhh: dataObj.summary.resting_hr,
-        hrr: dataObj.summary.recovery
-      });
-
-      if (!assessment || !assessment.ok) {
-          // TODO: Error
-          console.log('There was a Problem uploading the Data');
-          return;
-      }
-
-      setFatigueRisk(assessment.fatigue_risk);
-      setTrainingState(TrainingState.STOPPED)
+    if (!assessment || !assessment.ok) {
+        showError('There was a Problem uploading the Data');
+        return;
     }
-    catch (e) {
-      console.log(`Error Parsing Data: ${e}`);
-    }
+
+    setFatigueRisk(assessment.fatigue_risk);
+    setTrainingState(TrainingState.STOPPED);
 
     setTimeout(() => {
       props.setTraining(false);
@@ -227,6 +201,13 @@ const TrainingSession = (props: TrainingSessionProps) => {
       await stopMonitoring(props.summaryData);
       console.log('Unsubscribed from Summary Notifications');
     }
+  }
+
+  function showError(errorMessage: string) {
+    setErrorMessage(errorMessage);
+    setTimeout(() => {
+      setErrorMessage('');
+    }, 3000);
   }
 
   return (
@@ -296,7 +277,7 @@ const TrainingSession = (props: TrainingSessionProps) => {
           <button className='btn btn-outline btn-success rounded-lg' onClick={() => props.setActive(Tabs.CONNECT_DEVICE)}>Connect Device</button>
         </div>
       }
-
+      {errorMessage && <p className={`p-4 fixed bottom-8 bg-error rounded-xl text-error-content font-bold mb-4 ${style.errorEnter}`}>{errorMessage}</p>}
     </section>
   )
 }

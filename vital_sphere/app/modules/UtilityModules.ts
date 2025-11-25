@@ -112,3 +112,18 @@ export async function uploadFatigueData(fatigueData: object) {
         return {ok: false, message: 'Unable to Connect to Server'};
     }
 }
+
+export function decodeBluetoothData(char: BluetoothRemoteGATTCharacteristic) {
+    const decoder = new TextDecoder();
+    const value = char.value;
+    if (!value) return;
+    const dataArray = new Uint8Array(value.buffer);
+    const dataString = decoder.decode(dataArray);
+
+    try {
+        return JSON.parse(dataString);
+    }
+    catch (e) {
+        console.log(`Error Parsing Data: ${e}`);
+    }
+}
