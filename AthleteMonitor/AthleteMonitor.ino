@@ -248,8 +248,6 @@ void loop() {
 
     default: break;
   }
-
-  delay(25);
 }
 
 float readTemperatureC() {
@@ -264,7 +262,7 @@ void sendReading(int bpm) {
     std::string payload(buf);
     const char* c_str_payload = payload.c_str();
     size_t len = payload.length();
-    pMonitorCharacteristic->setValue((const uint8_t*)c_str_payload, len + 1);
+    pMonitorCharacteristic->setValue((const uint8_t*)c_str_payload, len);
     pMonitorCharacteristic->notify();
 
     Serial.printf("Resting HR: %d bpm\n", bpm);
@@ -279,7 +277,7 @@ void sendReading(float tempC, int bpm) {
     std::string payload(buf);
     const char* c_str_payload = payload.c_str();
     size_t len = payload.length();
-    pMonitorCharacteristic->setValue((const uint8_t*)c_str_payload, len + 1);
+    pMonitorCharacteristic->setValue((const uint8_t*)c_str_payload, len);
     pMonitorCharacteristic->notify();
 
     Serial.printf("[TX DATA] %s\n", buf);
@@ -297,7 +295,7 @@ void sendSummary(unsigned long training_s, int resting, int hr_after, int hr_1mi
     std::string payload(buf);
     const char* c_str_payload = payload.c_str();
     size_t len = payload.length();
-    pSummaryCharacteristic->setValue((const uint8_t*)c_str_payload, len + 1);
+    pSummaryCharacteristic->setValue((const uint8_t*)c_str_payload, len);
     pSummaryCharacteristic->notify();
     
     Serial.printf("[TX SUMMARY] %s\n", buf);

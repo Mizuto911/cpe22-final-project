@@ -18,7 +18,7 @@ def load_ai_model():
 def is_abnormal_reading(measurement: MeasurementRecord, user_data: User):
     if measurement.bpm > (220 - get_age(user_data.birthday)):
         return True
-    if measurement.temperature<35.0 or measurement.temperature>38.3:
+    if measurement.temperature<33.0 or measurement.temperature>37.0:
         return True
     return False
 

@@ -127,3 +127,11 @@ export function decodeBluetoothData(char: BluetoothRemoteGATTCharacteristic) {
         console.log(`Error Parsing Data: ${e}`);
     }
 }
+
+export function getTimerDisplay(timer: number) {
+    const seconds = timer % 60;
+    const minutes = Math.floor((timer % 3600) / 60);
+    const hours = Math.floor(timer / 3600);
+    const pad = (num: number) => num.toString().padStart(2,'0'); 
+    return `${pad(hours)}:${pad(minutes)}:${pad(seconds)}`;
+}
