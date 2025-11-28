@@ -1,4 +1,5 @@
 from api.basemodels import FatigueDataRecord, FatigueAssessment
+from typing import List
 from api.models import FatigueData
 from api.deps import user_dependency, db_dependency, user_object_dependency
 from fastapi import APIRouter, status
@@ -12,7 +13,8 @@ def get_fatigue_data(db: db_dependency, user: user_dependency, fatigue_data_id: 
 
 @router.get('/fatiguedata')
 def get_user_fatigue_data(db: db_dependency, user: user_dependency):
-    return db.query(FatigueData).filter(FatigueData.user_id == user.get('id')).all()
+    fatigue_data = db.query(FatigueData).filter(FatigueData.user_id == user.get('id')).all()
+    return {'data': fatigue_data, 'average': get_average(fatigue_data)}
 
 @router.post('/', status_code=status.HTTP_201_CREATED, response_model=FatigueAssessment)
 def record_fatigue_data(db: db_dependency, user: user_dependency, fatigue_data: FatigueDataRecord, user_object: user_object_dependency):
@@ -35,3 +37,14 @@ def delete_fatigue_data(db: db_dependency, user: user_dependency, fatigue_data_i
         db.delete(db_fatigue_data)
         db.commit()
     return db_fatigue_data
+
+def get_average(fatigue_data: List[FatigueData]):
+    length = len(fatigue_data)
+    sum_hrr = 0
+    sum_rhh = 0
+    sum_train_time = 0
+    for i in range(length):
+        sum_hrr += fatigue_data[i].hrr
+        sum_rhh += fatigue_data[i].rhh
+        sum_train_time = fatigue_data[i].train_time
+    return {'hrr': sum_hrr / length, 'rhh': sum_rhh / length, 'train_time': sum_train_time / length}

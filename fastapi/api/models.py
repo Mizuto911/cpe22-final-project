@@ -1,6 +1,5 @@
-from sqlalchemy import Column, Integer, Float, String, ForeignKey, DateTime, Boolean, Date
+from sqlalchemy import Column, Integer, Float, String, ForeignKey, Boolean, Date, TIMESTAMP, text
 from sqlalchemy.orm import relationship
-from datetime import datetime, timezone
 from .database import Base
 
 class User(Base):
@@ -16,7 +15,7 @@ class User(Base):
 class Measurement(Base):
     __tablename__='measurements'
     id = Column(Integer, primary_key=True)
-    timestamp = Column(DateTime, default=datetime.now(timezone.utc))
+    timestamp = Column(TIMESTAMP(timezone=True), nullable=False)
     bpm = Column(Integer)
     temperature = Column(Float)
     user = relationship('User', back_populates='measurements')
