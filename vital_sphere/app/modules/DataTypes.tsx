@@ -22,6 +22,43 @@ export type UserData = {
     is_female: boolean
 }
 
+type MeasurementData = {
+    id: number,
+    bpm: number,
+    temperature: number,
+    timestamp: Date,
+    user_id: number
+}
+
+type MeasurementAverage = {
+    bpm: number,
+    temperature: number
+}
+
+export type MeasurementResponseData = {
+    data: MeasurementData[],
+    average: MeasurementAverage
+}
+
+type FatigueData = {
+    id: number,
+    rhh: number,
+    hrr: number,
+    train_time: number,
+    user_id: number
+}
+
+type FatigueAverage = {
+    rhh: number,
+    hrr: number,
+    train_time: number
+}
+
+export type FatigueResponseData = {
+    data: FatigueData[],
+    average: FatigueAverage
+}
+
 export enum Tabs {
     DASHBOARD, TRAINING_SESSION, CONNECT_DEVICE, VITALS_SUMMARY, SETTINGS
 }

@@ -54,7 +54,7 @@ const page = () => {
     switch (activeTab){
 
       case Tabs.DASHBOARD:
-        return <Dashboard userData={userData} setActive={setActiveTab} device={monitorDevice} />
+        return <Dashboard userData={userData} setActive={setActiveTab} device={monitorDevice} setLoading={setLoading} />
 
       case Tabs.TRAINING_SESSION:
         return <TrainingSession device={monitorDevice} monitorData={monitorData} training={training}
@@ -62,7 +62,7 @@ const page = () => {
 
       case Tabs.CONNECT_DEVICE:
         return <DeviceConnect hasBluetooth={hasBluetooth} device={monitorDevice} setDevice={setMonitorDevice} setActive={setActiveTab}
-            setLoading={setLoading} setMonitorData={setMonitorData} setCommandSend={setCommandSend} setSummaryData={setSummaryData} />
+            setMonitorData={setMonitorData} setCommandSend={setCommandSend} setSummaryData={setSummaryData} />
 
       case Tabs.VITALS_SUMMARY:
         return <VitalSummary />

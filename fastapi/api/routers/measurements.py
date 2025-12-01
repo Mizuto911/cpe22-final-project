@@ -1,4 +1,4 @@
-from fastapi import APIRouter, status
+from fastapi import APIRouter, status, HTTPException
 from api.models import Measurement
 from typing import List
 from api.deps import db_dependency, user_dependency, user_object_dependency
@@ -15,7 +15,9 @@ def get_measurement(db: db_dependency, user: user_dependency, measurement_id: in
 @router.get('/measurements')
 def get_measurements(db: db_dependency, user: user_dependency):
     measurements = db.query(Measurement).filter(Measurement.user_id == user.get('id')).all()
-    return {'data': measurements, 'average': get_average(measurements)}
+    if measurements:
+        return {'data': measurements, 'average': get_average(measurements)}
+    raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='User Measurements does not Exist')
 
 @router.post('/', status_code=status.HTTP_201_CREATED, response_model=OverworkAssessment)
 def record_measurement(db: db_dependency, user: user_dependency, measurement: MeasurementRecord, user_object: user_object_dependency): 
@@ -47,4 +49,4 @@ def get_average(measurements: List[Measurement]):
     for i in range(length):
         sum_bpm += measurements[i].bpm
         sum_temperature += measurements[i].temperature
-    return {'bpm': sum_bpm / length, 'temperature': sum_temperature / length}
+    return {'bpm': round(sum_bpm / length, 2), 'temperature': round(sum_temperature / length, 2)}

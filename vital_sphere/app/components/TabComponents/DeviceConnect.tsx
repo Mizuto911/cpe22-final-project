@@ -10,7 +10,6 @@ interface DeviceConnectProps {
   hasBluetooth: boolean
   device: BluetoothDevice | null
   setDevice: Function
-  setLoading: Function
   setMonitorData: Function
   setCommandSend: Function
   setSummaryData: Function

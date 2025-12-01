@@ -4,12 +4,14 @@ import { hasEmptyFields } from '@/app/modules/UtilityModules';
 import AuthContext from '../context/AuthContext';
 import Link from 'next/link';
 import style from './Forms.module.css' 
+import clsx from 'clsx';
 
 const SignInForm = () => {
 
     const { login } = useContext(AuthContext);
     const [isLoading, setLoading] = useState(false);
     const [errorMessage, setErrorMessage] = useState('');
+    const [showPassword, setShowPassword] = useState(false);
 
     async function handleSubmit(event: FormEvent<HTMLFormElement>) {
         event.preventDefault();
@@ -46,9 +48,13 @@ const SignInForm = () => {
                 />
             </div>
             <div className='flex flex-col items-start max-md:max-w-[300px] max-md:w-[80%] w-[55%]'>
-                <input type="password" name='password' id='password' onChange={() => setErrorMessage('')}
+                <input type={clsx(showPassword ? 'text' : 'password')} name='password' id='password' onChange={() => setErrorMessage('')}
                     className="input input-primary w-full text-[1rem] py-5" placeholder='Password'
                 />
+            </div>
+            <div className='flex flex-row gap-4 justify-end max-md:max-w-[300px] max-md:w-[80%] w-[55%]'>
+                <input type="checkbox" className="checkbox checkbox-primary" onChange={() => setShowPassword(prev => !prev)} />
+                <p className='max-md:text-sm text-md'>Show Password</p>
             </div>
 
             <button className='btn btn-primary max-md:max-w-[300px] w-[45%] rounded-[7px]'>Log In</button>

@@ -8,6 +8,7 @@ import Image from "next/image";
 import "react-day-picker/style.css";
 import AuthContext from "../context/AuthContext";
 import style from './Forms.module.css';
+import clsx from "clsx";
 
 const RegistrationForm = () => {
     const { register } = useContext(AuthContext);
@@ -15,6 +16,7 @@ const RegistrationForm = () => {
     const [isFemale, setFemale] = useState(false);
     const [errorMessage, setErrorMessage] = useState('');
     const [isLoading, setLoading] = useState(false);
+    const [showPassword, setShowPassword] = useState(false);
 
     function showError(message: string) {
         setErrorMessage(message);
@@ -49,8 +51,12 @@ const RegistrationForm = () => {
         <form onSubmit={handleSubmit} autoComplete="off" className="flex flex-col justify-start items-center gap-4 max-md:mx-6 max-sm:mx-4">
             <input type="text" name="username" placeholder="Enter User Name"
                 className="input input-primary w-full max-w-[500px] text-[1rem] py-5 mt-5" />
-            <input type="password" name="password" placeholder="Password"
+            <input type={showPassword ? 'text' : 'password'} name="password" placeholder="Password"
                 className="input input-primary w-full max-w-[500px] text-[1rem] py-5" />
+            <div className='flex flex-row gap-4 justify-end w-full max-w-[500px]'>
+                <input type="checkbox" className="checkbox checkbox-primary" onChange={() => setShowPassword(prev => !prev)} />
+                <p className='max-md:text-sm text-md'>Show Password</p>
+            </div>
             <section className="w-full max-w-[500px] flex flex-col items-center gap-2">
                 <label htmlFor="birthday"
                     className="font-bold w-full text-start"
