@@ -37,3 +37,23 @@ export async function getFatigueData() {
         return null;
     }
 }
+
+export async function getStatistics() {
+    try {
+        const response = await fetch('http://localhost:8000/measurements/statistics', {
+            headers: {'Content-Type': 'application/json', 'Authorization': `Bearer ${localStorage.getItem('token')}`}
+        });
+        if (response.ok) {
+            const dataStat = await response.json();
+            return dataStat;
+        }
+        else {
+            console.log('Statistics Fetch Failed');
+            return null;
+        }
+    }
+    catch (e) {
+        console.log('Unable to Connect to Server');
+        return null;
+    }
+}

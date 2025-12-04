@@ -59,8 +59,8 @@ const Dashboard = (props: DashboardProps) => {
               <h3 className="text-md font-bold text-white">Body Temperature</h3>
               <FaTemperatureLow className="text-lg font-bold text-white mt-0.5" />
             </div>
-            <p className="text-2xl font-bold text-white mt-6">{measurement ? `${measurement.average.temperature}°C`: 'No Records'} </p>
-            <p className="text-sm text-white">Average Temperature </p>
+            <p className="text-2xl font-bold text-white mt-6">{measurement ? `${measurement.average.temperature}°C`: 'No Records'}</p>
+            <p className="text-sm text-white">Average Temperature</p>
           </section>
         </div>
 
@@ -156,7 +156,7 @@ const Dashboard = (props: DashboardProps) => {
         </div>
 
         <div className="w-full h-auto bg-base-100 shadow-2xl rounded-xl p-6">
-          <label htmlFor="body_temp" className="font-bold text-lg">Body Temperature Trends</label>
+          <label htmlFor="body_temp" className="font-bold text-lg">Average Fatigue Data</label>
           <BarChart
             xAxis={[{data: ['Resting Heart Rate', 'Heart Rate Recovery', 'Training Time (Hours)']}]}
             series={[{

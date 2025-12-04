@@ -40,6 +40,29 @@ export type MeasurementResponseData = {
     average: MeasurementAverage
 }
 
+type StatisticsData = {
+    mean: number,
+    median: number,
+    mode: number,
+    variance: number,
+    std: number
+}
+
+export type OccurenceData = {
+    [key: string]: number,
+}
+
+export type StatisticsResponse = {
+    statistics: {
+        bpm: StatisticsData,
+        temp: StatisticsData
+    }
+    occurence: {
+        bpm: OccurenceData
+        temp: OccurenceData
+    }
+}
+
 type FatigueData = {
     id: number,
     rhh: number,

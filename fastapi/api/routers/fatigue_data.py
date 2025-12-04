@@ -2,7 +2,7 @@ from api.basemodels import FatigueDataRecord, FatigueAssessment
 from typing import List
 from api.models import FatigueData
 from api.deps import user_dependency, db_dependency, user_object_dependency
-from fastapi import APIRouter, status
+from fastapi import APIRouter, status, HTTPException
 from api.ai_models.decision_tree_ai import has_fatigue_risk
 
 router = APIRouter(prefix='/fatiguedata', tags=['fatiguedata'])
@@ -14,7 +14,9 @@ def get_fatigue_data(db: db_dependency, user: user_dependency, fatigue_data_id: 
 @router.get('/fatiguedata')
 def get_user_fatigue_data(db: db_dependency, user: user_dependency):
     fatigue_data = db.query(FatigueData).filter(FatigueData.user_id == user.get('id')).all()
-    return {'data': fatigue_data, 'average': get_average(fatigue_data)}
+    if fatigue_data:
+        return {'data': fatigue_data, 'average': get_average(fatigue_data)}
+    raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='User Measurements does not Exist')
 
 @router.post('/', status_code=status.HTTP_201_CREATED, response_model=FatigueAssessment)
 def record_fatigue_data(db: db_dependency, user: user_dependency, fatigue_data: FatigueDataRecord, user_object: user_object_dependency):
@@ -43,6 +45,10 @@ def get_average(fatigue_data: List[FatigueData]):
     sum_hrr = 0
     sum_rhh = 0
     sum_train_time = 0
+
+    if length == 0:
+        return {'hrr': 0, 'rhh': 0, 'train_time': 0}
+
     for i in range(length):
         sum_hrr += fatigue_data[i].hrr
         sum_rhh += fatigue_data[i].rhh

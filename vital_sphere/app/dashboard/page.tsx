@@ -65,7 +65,7 @@ const page = () => {
             setMonitorData={setMonitorData} setCommandSend={setCommandSend} setSummaryData={setSummaryData} />
 
       case Tabs.VITALS_SUMMARY:
-        return <VitalSummary />
+        return <VitalSummary setLoading={setLoading} />
 
       case Tabs.SETTINGS:
         return <Settings />
