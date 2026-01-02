@@ -14,6 +14,7 @@ interface DeviceConnectProps {
   setCommandSend: Function
   setSummaryData: Function
   setActive: Function
+  showErrorMessage: Function
 }
 
 const DeviceConnect = (props: DeviceConnectProps) => {
@@ -37,6 +38,12 @@ const DeviceConnect = (props: DeviceConnectProps) => {
         props.setMonitorData(chars?.monitor);
         props.setCommandSend(chars?.command);
         props.setSummaryData(chars?.summary);
+      }
+      catch (e) {
+        if (e instanceof Error)
+          props.showErrorMessage(e.message, false);
+        else
+          props.showErrorMessage(String(e), false);
       }
       finally {
         setConnecting(false);

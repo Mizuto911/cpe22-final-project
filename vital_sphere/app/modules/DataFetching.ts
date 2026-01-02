@@ -1,7 +1,11 @@
 export async function getMeasurementData() {
     try {
         const response = await fetch('http://localhost:8000/measurements/measurements', {
-            headers: {'Content-Type': 'application/json', 'Authorization': `Bearer ${localStorage.getItem('token')}`}
+            headers: {
+            'Content-Type': 'application/json', 
+            'Authorization': `Bearer ${localStorage.getItem('token')}`,
+            'ngrok-skip-browser-warning': 'true'
+        }
         });
         if (response.ok) {
             const measurement = await response.json();
@@ -21,7 +25,11 @@ export async function getMeasurementData() {
 export async function getFatigueData() {
     try {
         const response = await fetch('http://localhost:8000/fatiguedata/fatiguedata', {
-            headers: {'Content-Type': 'application/json', 'Authorization': `Bearer ${localStorage.getItem('token')}`}
+            headers: {
+            'Content-Type': 'application/json', 
+            'Authorization': `Bearer ${localStorage.getItem('token')}`,
+            'ngrok-skip-browser-warning': 'true'
+        }
         });
         if (response.ok) {
             const fatigueData = await response.json();
@@ -41,7 +49,11 @@ export async function getFatigueData() {
 export async function getStatistics() {
     try {
         const response = await fetch('http://localhost:8000/measurements/statistics', {
-            headers: {'Content-Type': 'application/json', 'Authorization': `Bearer ${localStorage.getItem('token')}`}
+            headers: {
+            'Content-Type': 'application/json', 
+            'Authorization': `Bearer ${localStorage.getItem('token')}`,
+            'ngrok-skip-browser-warning': 'true'
+        }
         });
         if (response.ok) {
             const dataStat = await response.json();

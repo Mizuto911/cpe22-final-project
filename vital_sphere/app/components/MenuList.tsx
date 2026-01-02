@@ -1,10 +1,5 @@
 'use client'
-import { Dispatch, SetStateAction } from 'react'
-import { RiDashboardHorizontalFill } from 'react-icons/ri';
-import { FaRunning } from "react-icons/fa";
-import { MdBluetoothConnected, MdLogout } from "react-icons/md";
-import { CiWavePulse1 } from "react-icons/ci";
-import { FaGear } from "react-icons/fa6";
+import { MdLogout } from "react-icons/md";
 import { TabList, Tabs } from '../modules/DataTypes';
 import clsx from 'clsx';
 
@@ -13,6 +8,7 @@ interface MenuListProps {
     setActive: Function
     training: boolean
     setLogOutConfirm: Function
+    setShowDrawer: Function | null
 }
 
 const MenuList = (props: MenuListProps) => {
@@ -31,13 +27,19 @@ const MenuList = (props: MenuListProps) => {
         );
 
         return <li key={tab.id} className={className} onClick={() => handleTabChange(tab.id)}>
-            {tab.icon} <span className='max-md:hidden'>{tab.name}</span>
+            {tab.icon} <span className="min-w-0">{tab.name}</span>
         </li>
     });
 
     function handleTabChange(tab: Tabs) {
         if (!props.training)
             props.setActive(tab);
+
+        setTimeout(() => {
+            if (props.setShowDrawer) {
+                props.setShowDrawer(false);
+            }
+        }, 20);
     }
 
   return (
@@ -45,7 +47,7 @@ const MenuList = (props: MenuListProps) => {
         {tabListElements}
         <li className={logOutClassName}
             onClick={props.training ? () => {} : () => props.setLogOutConfirm(true)}>
-            <MdLogout className='text-3xl me-6' /> <span className='max-md:hidden'>Log Out</span>
+            <MdLogout className='text-3xl me-6 inline-block' /> <span className="min-w-0">Log Out</span>
         </li>
     </ul>
   )

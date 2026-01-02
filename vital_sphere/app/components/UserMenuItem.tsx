@@ -15,7 +15,7 @@ const UserMenuItem = (props: UserMenuItemProps) => {
             <Image src="/images/default_user.jpg" alt="User Profile" width={50} height={50}
                             className="rounded-[50%]" />
         </div>
-        <div className='max-md:hidden'>
+        <div>
             <h3 className='font-bold text-lg p-0'>{props.userData.name}</h3>
             <p className='text-green-600 text-sm'>Ready For Training</p>
         </div>

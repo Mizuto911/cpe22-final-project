@@ -16,10 +16,37 @@ export type LoginResponseData = {
 }
 
 export type UserData = {
-    id: number,
     name: string,
     birthday: Date,
     is_female: boolean
+}
+
+export type UserUpdateFormData = {
+    userName: string,
+    birthDay: Date,
+    isFemale: boolean
+}
+
+export type UserUpdateData = {
+    name: string,
+    birthday: string,
+    password: string
+    is_female: boolean
+}
+
+export type UserUpdateDataResponse = {
+    name: string,
+    birthday: Date,
+    is_female: boolean
+}
+
+export type UserPassUpdateData = {
+    password: string,
+    old_password: string
+}
+
+export type DataFetchError = {
+    detail: {msg: string}
 }
 
 type MeasurementData = {
@@ -82,6 +109,11 @@ export type FatigueResponseData = {
     average: FatigueAverage
 }
 
+export type WindowSize = {
+    width: number | undefined,
+    height: number | undefined
+}
+
 export enum Tabs {
     DASHBOARD, TRAINING_SESSION, CONNECT_DEVICE, VITALS_SUMMARY, SETTINGS
 }
@@ -90,10 +122,14 @@ export enum TrainingState {
     IDLE, MEASURING_REST, TRAINING, HR_RECOVERY_WAIT, MEASURING_HR_RECOVERY, STOPPED
 }
 
+export enum SettingTabs {
+    PROFILE, DATA
+}
+
 export const TabList = [
-    { id: Tabs.DASHBOARD, name: 'Dashboard', icon: <RiDashboardHorizontalFill className='text-3xl me-6' />},
-    { id: Tabs.TRAINING_SESSION, name: 'Training Session', icon: <FaRunning className='text-3xl me-6' />},
-    { id: Tabs.CONNECT_DEVICE, name: 'Connect Device', icon: <MdBluetoothConnected className='text-3xl me-6' />},
-    { id: Tabs.VITALS_SUMMARY, name: 'Vitals Summary', icon: <CiWavePulse1 className='text-3xl me-6' />},
-    { id: Tabs.SETTINGS, name: 'Settings', icon: <FaGear className='text-3xl me-6' />}
+    { id: Tabs.DASHBOARD, name: 'Dashboard', icon: <RiDashboardHorizontalFill className='text-3xl me-6 inline-block' />},
+    { id: Tabs.TRAINING_SESSION, name: 'Training Session', icon: <FaRunning className='text-3xl me-6 inline-block' />},
+    { id: Tabs.CONNECT_DEVICE, name: 'Connect Device', icon: <MdBluetoothConnected className='text-3xl me-6 inline-block' />},
+    { id: Tabs.VITALS_SUMMARY, name: 'Vitals Summary', icon: <CiWavePulse1 className='text-3xl me-6 inline-block' />},
+    { id: Tabs.SETTINGS, name: 'Settings', icon: <FaGear className='text-3xl me-6 inline-block' />}
 ]

@@ -7,6 +7,7 @@ import StatisticsCard from '../StatisticsCard'
 
 interface VitalSummaryProps {
   setLoading: Function
+  showErrorMessage: Function
 }
 
 const VitalSummary = (props: VitalSummaryProps) => {
@@ -14,16 +15,24 @@ const VitalSummary = (props: VitalSummaryProps) => {
   const [dataStat, setDataStat] = useState<StatisticsResponse | null>(null);
 
   useEffect(() => {
-    async function statistics() {
-      props.setLoading(true);
-      setDataStat(await getStatistics());
-      props.setLoading(false);
+    try {
+      async function statistics() {
+        props.setLoading(true);
+        setDataStat(await getStatistics());
+        props.setLoading(false);
+      }
+      statistics();
     }
-    statistics();
+    catch (e) {
+      if (e instanceof Error)
+        props.showErrorMessage(e.message, false);
+      else
+        props.showErrorMessage(String(e), false);
+    }
   }, []);
 
   return (
-    <section className='p-8 flex flex-col items-center max-h-[calc(100vh-4rem)] overflow-y-auto'>
+    <section className='p-8 flex flex-col items-center overflow-x-hidden max-h-[calc(100vh-4rem)] overflow-y-auto'>
       <h2 className='text-[clamp(1.8rem,3vw,2.25rem)] font-bold w-full mb-8'>Vitals Data Statistics</h2>
 
       <StatisticsCard 

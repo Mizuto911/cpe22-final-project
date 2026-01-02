@@ -265,7 +265,7 @@ const TrainingSession = (props: TrainingSessionProps) => {
           <p className='w-full mb-8 text-[clamp(1rem,1.5vw,1.25rem)]'>{getTrainingContent()}</p>
 
           <section className='w-full flex flex-row gap-5 justify-evenly mt-16 max-lg:flex-col max-lg:items-center max-lg:mt-8'>
-            <article className='w-[30%] min-w-[300px] max-w-[400px] bg-base-200 shadow-xl rounded-xl border-gray-200 border-1 max-lg:w-full max-lg:max-w-none'>
+            <article className='w-[30%] min-w-[350px] max-w-[400px] bg-base-200 shadow-xl rounded-xl border-gray-200 border-1 max-lg:w-full max-lg:max-w-none'>
               <h2 className='text-secondary text-xl font-bold text-center p-2 border-b-secondary border-b-2'>Live</h2>
               <ul className='mt-5 mb-8'>
                 <li className='flex flex-row justify-between px-6 mb-2'>
@@ -289,7 +289,7 @@ const TrainingSession = (props: TrainingSessionProps) => {
               </p>
             </article>
 
-            <article className='w-[30%] min-w-[300px] max-w-[400px] bg-base-200 shadow-xl rounded-xl border-gray-200 border-1 max-lg:w-full max-lg:max-w-none'>
+            <article className='w-[30%] min-w-[350px] max-w-[400px] bg-base-200 shadow-xl rounded-xl border-gray-200 border-1 max-lg:w-full max-lg:max-w-none'>
               <h2 className='text-accent text-xl font-bold text-center p-2 border-b-accent border-b-2'>Session Summary</h2>
               <ul className='mt-5 mb-8'>
                 <li className='flex flex-row justify-between px-6 mb-2'>

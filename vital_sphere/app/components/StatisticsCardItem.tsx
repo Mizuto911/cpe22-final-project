@@ -11,7 +11,7 @@ interface StatisticsCardItemProps  {
 const StatisticsCardItem = (props: StatisticsCardItemProps) => {
   return (
     <li className='flex flex-row justify-between items-center p-3 text-info-content border-b-1 border-gray-300'>
-        <span className='font-bold text-[clamp(1rem,1.5vw,1.2rem)'>{props.statName}:</span>
+        <span className='font-bold text-[clamp(1rem,1.5vw,1.2rem)]'>{props.statName}:</span>
         <span className='text-[clamp(1rem,1.5vw,1.2rem)]'>{props.value} {props.unitName}</span>
     </li>
   )

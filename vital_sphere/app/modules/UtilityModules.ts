@@ -70,7 +70,11 @@ export async function supportsBluetooth() {
 export async function uploadMeasurement(measurement: object) {
     const response = await fetch('http://localhost:8000/measurements/', {
         method: 'POST',
-        headers: {'Content-Type': 'application/json', 'Authorization': `Bearer ${localStorage.getItem('token')}`},
+        headers: {
+            'Content-Type': 'application/json', 
+            'Authorization': `Bearer ${localStorage.getItem('token')}`,
+            'ngrok-skip-browser-warning': 'true'
+        },
         body: JSON.stringify(measurement)
     });
 
@@ -93,7 +97,11 @@ export async function uploadMeasurement(measurement: object) {
 export async function uploadFatigueData(fatigueData: object) {
     const response = await fetch('http://localhost:8000/fatiguedata/', {
         method: 'POST',
-        headers: {'Content-Type': 'application/json', 'Authorization': `Bearer ${localStorage.getItem('token')}`},
+        headers: {
+            'Content-Type': 'application/json', 
+            'Authorization': `Bearer ${localStorage.getItem('token')}`,
+            'ngrok-skip-browser-warning': 'true'
+        },
         body: JSON.stringify(fatigueData)
     });
 
@@ -134,4 +142,32 @@ export function getTimerDisplay(timer: number) {
     const hours = Math.floor(timer / 3600);
     const pad = (num: number) => num.toString().padStart(2,'0'); 
     return `${pad(hours)}:${pad(minutes)}:${pad(seconds)}`;
+}
+
+export function isEqualObject(
+    object1: Record<string, any>, 
+    object2: Record<string, any>
+): boolean {
+    const keys1 = Object.keys(object1);
+    const keys2 = Object.keys(object2);
+
+    if (keys1.length !== keys2.length) return false;
+
+    for (const key of keys1) {
+        const val1 = object1[key];
+        const val2 = object2[key];
+
+        if (val1 instanceof Date && val2 instanceof Date) {
+            const date1 = formatDateToISOStringLocally(val1);
+            const date2 = formatDateToISOStringLocally(val2);
+            if (date1 !== date2) return false;
+            continue; // Move to the next key
+        }
+
+        if (val1 !== val2) {
+            return false;
+        }
+    }
+
+    return true;
 }

@@ -3,7 +3,8 @@
 import { ReactNode, useState } from "react"
 import { useRouter } from "next/navigation";
 import AuthContext from "./AuthContext";
-import { RegisterResponseData, LoginResponseData } from "../modules/DataTypes";
+import { RegisterResponseData, LoginResponseData, UserPassUpdateData, 
+    UserUpdateData, DataFetchError, UserData, UserUpdateDataResponse } from "../modules/DataTypes";
 
 type AuthProviderProps = {
     children: ReactNode
@@ -25,7 +26,7 @@ const AuthProvider = ({ children }: AuthProviderProps) => {
             })
             const response = await fetch('http://localhost:8000/auth/token', { 
                 method: 'POST', 
-                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'ngrok-skip-browser-warning': 'true' },
                 body: data
             })
             
@@ -59,7 +60,7 @@ const AuthProvider = ({ children }: AuthProviderProps) => {
             }
             const response = await fetch('http://localhost:8000/auth', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 'Content-Type': 'application/json', 'ngrok-skip-browser-warning': 'true' },
                 body: JSON.stringify(data)
             })
 
@@ -86,7 +87,10 @@ const AuthProvider = ({ children }: AuthProviderProps) => {
     const getUserData = async () => {
         try {
             const response = await fetch('http://localhost:8000/auth/data', 
-                {method: 'GET', headers:{Authorization: `Bearer ${localStorage.getItem('token')}`}});
+                {method: 'GET', headers:{
+                    Authorization: `Bearer ${localStorage.getItem('token')}`,
+                    'ngrok-skip-browser-warning': 'true'
+                }});
             const userData = await response.json();
             console.log('User Data get Complete!');
             console.log(userData);
@@ -98,13 +102,95 @@ const AuthProvider = ({ children }: AuthProviderProps) => {
         }
     }
 
+    const updateUserData = async (userData: UserUpdateData): Promise<UserUpdateDataResponse | DataFetchError> => {
+        try {
+            const response = await fetch('http://localhost:8000/auth/data', 
+                {method: 'PUT', headers:{
+                    Authorization: `Bearer ${localStorage.getItem('token')}`,
+                    'ngrok-skip-browser-warning': 'true',
+                    'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(userData)
+                });
+            
+            if (response.ok) {
+                const userData = await response.json();
+                console.log('Data Update Successful!');
+                return userData;
+            }
+            else {
+                const error = await response.json();
+                console.log(`Data Update Failed: ${error.detail}`);
+                return error
+            }
+        }
+        catch (e) {
+            console.log(`Data Update Failed: ${String(e)}`);
+            return {detail: {msg: 'Unable to Connect to Server'}}
+        }
+    }
+
+    const updateUserPassword = async (passwordData: UserPassUpdateData): Promise<UserUpdateDataResponse | DataFetchError> => {
+        try {
+            const response = await fetch('http://localhost:8000/auth/password', 
+                {method: 'PUT', headers:{
+                    Authorization: `Bearer ${localStorage.getItem('token')}`,
+                    'ngrok-skip-browser-warning': 'true',
+                    'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(passwordData)
+                });
+            
+            if (response.ok) {
+                const userData = await response.json();
+                console.log('Password Update Successful!');
+                return userData;
+            }
+            else {
+                const error = await response.json();
+                console.log(`Password Update Failed: ${error.detail}`);
+                return error
+            }
+        }
+        catch (e) {
+            console.log(`Data Update Failed: ${String(e)}`);
+            return {detail: {msg: 'Unable to Connect to Server'}}
+        }
+    }
+
+    const deleteUserLogs = async (): Promise<true | DataFetchError> => {
+        try {
+            const response = await fetch('http://localhost:8000/auth/clear-data', {
+                method: 'DELETE',
+                headers: { 
+                    Authorization: `Bearer ${localStorage.getItem('token')}`,
+                    'ngrok-skip-browser-warning': 'true'
+                }
+            });
+
+            if (response.ok) {
+                console.log('User Logs Deleted Successfully!');
+                return true;
+            }
+            else {
+                const error = await response.json();
+                console.log(`Log Delete Failed: ${error.detail}`);
+                return error;
+            }
+        }
+        catch (e) {
+            console.log(`Log Delete Failed: ${String(e)}`)
+            return {detail: {msg: 'Unable to Connect to Server'}}
+        }
+    }
+
     const logOut = () => {
         setUser(null);
         localStorage.removeItem('token');
         router.push('/');
     }
 
-    const authProviderValue = { user, isAuthenticated, login, register, getUserData, logOut }
+    const authProviderValue = { user, isAuthenticated, login, register, getUserData, updateUserData, updateUserPassword, deleteUserLogs, logOut }
 
     return (
         <AuthContext.Provider value={authProviderValue}>

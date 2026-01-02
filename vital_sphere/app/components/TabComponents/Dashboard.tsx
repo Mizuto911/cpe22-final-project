@@ -1,5 +1,6 @@
 'use client'
 import { useEffect, useState } from "react"
+import { useWindowSize } from "@/app/modules/CustomHooks"
 import { UserData } from "@/app/modules/DataTypes"
 import { FaHeart, FaTemperatureLow, FaShieldAlt, FaBluetooth } from "react-icons/fa"
 import { getMeasurementData, getFatigueData } from "@/app/modules/DataFetching"
@@ -18,6 +19,9 @@ const Dashboard = (props: DashboardProps) => {
 
   const [measurement, setMeasurement] = useState<MeasurementResponseData | null>(null);
   const [fatigueData, setFatigueData] = useState<FatigueResponseData | null>(null);
+
+  const windowSize = useWindowSize();
+  let chartHeight: number = ((windowSize.width && windowSize.width <= 992) ? 200 : 300);
 
   const deviceStatus = props.device ? 'Online' : 'Offline';
   const deviceCardClassName = clsx(
@@ -105,7 +109,7 @@ const Dashboard = (props: DashboardProps) => {
                 color: '#422ad5'
               },
             ]}
-            height={300}
+            height={chartHeight}
             sx={{
               '& .MuiAreaElement-root': {
                 opacity: '0.5'
@@ -138,7 +142,7 @@ const Dashboard = (props: DashboardProps) => {
                 color: '#f43098'
               },
             ]}
-            height={300}
+            height={chartHeight}
             sx={{
               '& .MuiAreaElement-root': {
                 opacity: '0.5'
@@ -164,7 +168,7 @@ const Dashboard = (props: DashboardProps) => {
               color: '#00d3bb',
               minBarSize: 40
             }]}
-            height={300}
+            height={chartHeight}
           />
         </div>
       </section>

@@ -16,7 +16,21 @@ class UserCreateRequest(BaseModel):
     is_female: Optional[bool] = False
 
 class UserGetRequest(BaseModel):
-    id: int
+    name: str
+    birthday: date
+    is_female: Optional[bool] = False
+
+class UserUpdateRequest(BaseModel):
+    name: str
+    birthday: date
+    password: str
+    is_female: Optional[bool] = False
+
+class UserPassUpdateRequest(BaseModel):
+    old_password: str
+    password: str
+
+class UserUpdateResponse(BaseModel):
     name: str
     birthday: date
     is_female: Optional[bool] = False

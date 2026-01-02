@@ -3,6 +3,7 @@ import React, { ReactNode } from 'react'
 import StatisticsCardItem from './StatisticsCardItem'
 import { OccurenceData } from '../modules/DataTypes';
 import { BarChart } from '@mui/x-charts';
+import { useWindowSize } from '@/app/modules/CustomHooks'
 
 interface StatisticsCardProps {
     title: string
@@ -20,8 +21,11 @@ interface StatisticsCardProps {
 
 const StatisticsCard = (props: StatisticsCardProps) => {
 
+  const windowSize = useWindowSize();
+  let chartHeight: number = ((windowSize.width && windowSize.width <= 992) ? 200 : 400);
+
   return (
-    <article className='p-5 rounded-xl shadow-xl max-w-[1000px] min-w-[400px] w-[70%] mb-6 border-gray-200 border-1'>
+    <article className='p-5 rounded-xl shadow-xl max-w-[1000px] min-w-[350px] w-[70%] mb-6 border-gray-200 border-1'>
         <h3 className='w-fit font-bold text-xl mb-5'>{props.logo} {props.title}</h3>
 
         <BarChart
@@ -29,7 +33,7 @@ const StatisticsCard = (props: StatisticsCardProps) => {
           series={[{
             data: Object.values(props.occurenceDataset)
           }]}
-          height={400}
+          height={chartHeight}
         />
 
         <ul className='flex flex-col gap-3 mb-6'>

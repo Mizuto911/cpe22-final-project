@@ -14,14 +14,18 @@ const RegistrationForm = () => {
     const { register } = useContext(AuthContext);
     const [birthDay, setBirthDay] = useState<Date>();
     const [isFemale, setFemale] = useState(false);
-    const [errorMessage, setErrorMessage] = useState('');
+    const [error, setError] = useState({show: false, msg: ''});
     const [isLoading, setLoading] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
 
-    function showError(message: string) {
-        setErrorMessage(message);
+    const errorClassName = error.show ? 
+        'p-4 fixed bottom-8 bg-error rounded-xl text-error-content font-bold mb-4 opacity-100': 
+        'p-4 fixed bottom-[-60px] bg-error rounded-xl text-error-content font-bold mb-4 opacity-0'
+
+    function showErrorMessage(message: string) {
+        setError({show: true, msg: message});
         setTimeout(() => {
-            setErrorMessage('');
+            setError(oldError => ({show: false, msg: oldError.msg}));
         }, 2000);
     }
 
@@ -30,7 +34,7 @@ const RegistrationForm = () => {
         const formData = new FormData(e.currentTarget);
 
         if (hasEmptyFields(formData) || !birthDay) {
-            showError('Input all Fields!');
+            showErrorMessage('Please Fill out all Fields!');
             return;
         }
         else {
@@ -42,7 +46,7 @@ const RegistrationForm = () => {
         const successfulRegister = await register(formData);
 
         if(!successfulRegister.ok) {
-            showError(successfulRegister.message);
+            showErrorMessage(successfulRegister.message);
             setLoading(false);
         }
     }
@@ -105,7 +109,7 @@ const RegistrationForm = () => {
             {isLoading && <div className="fixed top-0 bottom-0 w-screen h-screen grid place-content-center bg-[rgba(0,0,0,0.5)]">
                     <div className={`loading loading-spinner loading-xl text-primary mb-4 ${style.loadingEnter}`}></div>
                 </div>}
-            {errorMessage && <p className={`p-4 fixed bottom-8 bg-error rounded-xl text-error-content font-bold mb-4 ${style.errorEnter}`}>{errorMessage}</p>}
+            <p className={clsx(errorClassName, 'duration-300 transition-all')}>{error.msg}</p>
         </form>
     )
 }
