@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation";
 import AuthContext from "./AuthContext";
 import { RegisterResponseData, LoginResponseData, UserPassUpdateData, 
     UserUpdateData, DataFetchError, UserData, UserUpdateDataResponse } from "../modules/DataTypes";
-
 type AuthProviderProps = {
     children: ReactNode
 }
@@ -24,7 +23,7 @@ const AuthProvider = ({ children }: AuthProviderProps) => {
                 username: formData.get('username') as string,
                 password: formData.get('password') as string
             })
-            const response = await fetch('http://localhost:8000/auth/token', { 
+            const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/token`, { 
                 method: 'POST', 
                 headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'ngrok-skip-browser-warning': 'true' },
                 body: data
@@ -58,7 +57,7 @@ const AuthProvider = ({ children }: AuthProviderProps) => {
                 birthday: formData.get('birthday'),
                 is_female: formData.get('gender') === 'female' ? true : false
             }
-            const response = await fetch('http://localhost:8000/auth', {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/auth`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', 'ngrok-skip-browser-warning': 'true' },
                 body: JSON.stringify(data)
@@ -86,7 +85,7 @@ const AuthProvider = ({ children }: AuthProviderProps) => {
 
     const getUserData = async () => {
         try {
-            const response = await fetch('http://localhost:8000/auth/data', 
+            const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/data`, 
                 {method: 'GET', headers:{
                     Authorization: `Bearer ${localStorage.getItem('token')}`,
                     'ngrok-skip-browser-warning': 'true'
@@ -104,7 +103,7 @@ const AuthProvider = ({ children }: AuthProviderProps) => {
 
     const updateUserData = async (userData: UserUpdateData): Promise<UserUpdateDataResponse | DataFetchError> => {
         try {
-            const response = await fetch('http://localhost:8000/auth/data', 
+            const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/data`, 
                 {method: 'PUT', headers:{
                     Authorization: `Bearer ${localStorage.getItem('token')}`,
                     'ngrok-skip-browser-warning': 'true',
@@ -132,7 +131,7 @@ const AuthProvider = ({ children }: AuthProviderProps) => {
 
     const updateUserPassword = async (passwordData: UserPassUpdateData): Promise<UserUpdateDataResponse | DataFetchError> => {
         try {
-            const response = await fetch('http://localhost:8000/auth/password', 
+            const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/password`, 
                 {method: 'PUT', headers:{
                     Authorization: `Bearer ${localStorage.getItem('token')}`,
                     'ngrok-skip-browser-warning': 'true',
@@ -160,7 +159,7 @@ const AuthProvider = ({ children }: AuthProviderProps) => {
 
     const deleteUserLogs = async (): Promise<true | DataFetchError> => {
         try {
-            const response = await fetch('http://localhost:8000/auth/clear-data', {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/clear-data`, {
                 method: 'DELETE',
                 headers: { 
                     Authorization: `Bearer ${localStorage.getItem('token')}`,

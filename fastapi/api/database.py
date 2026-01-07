@@ -1,8 +1,11 @@
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
+from dotenv import load_dotenv
+import os
 
-SQL_ALCHEMY_DATABASE_URL = 'sqlite:///athlete_monitoring.db'
+load_dotenv()
+SQL_ALCHEMY_DATABASE_URL = os.getenv('POSTGRESQL_URL')
 
 engine = create_engine(SQL_ALCHEMY_DATABASE_URL)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)

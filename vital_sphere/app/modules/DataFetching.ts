@@ -1,6 +1,6 @@
 export async function getMeasurementData() {
     try {
-        const response = await fetch('http://localhost:8000/measurements/measurements', {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/measurements/measurements`, {
             headers: {
             'Content-Type': 'application/json', 
             'Authorization': `Bearer ${localStorage.getItem('token')}`,
@@ -24,7 +24,7 @@ export async function getMeasurementData() {
 
 export async function getFatigueData() {
     try {
-        const response = await fetch('http://localhost:8000/fatiguedata/fatiguedata', {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/fatiguedata/fatiguedata`, {
             headers: {
             'Content-Type': 'application/json', 
             'Authorization': `Bearer ${localStorage.getItem('token')}`,
@@ -48,7 +48,7 @@ export async function getFatigueData() {
 
 export async function getStatistics() {
     try {
-        const response = await fetch('http://localhost:8000/measurements/statistics', {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/measurements/statistics`, {
             headers: {
             'Content-Type': 'application/json', 
             'Authorization': `Bearer ${localStorage.getItem('token')}`,

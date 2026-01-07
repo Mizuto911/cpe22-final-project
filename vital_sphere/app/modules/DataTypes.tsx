@@ -49,7 +49,7 @@ export type DataFetchError = {
     detail: {msg: string}
 }
 
-type MeasurementData = {
+export type MeasurementData = {
     id: number,
     bpm: number,
     temperature: number,
@@ -90,7 +90,7 @@ export type StatisticsResponse = {
     }
 }
 
-type FatigueData = {
+export type FatigueData = {
     id: number,
     rhh: number,
     hrr: number,

@@ -1,3 +1,5 @@
+import { FatigueResponseData, MeasurementResponseData, MeasurementData, FatigueData } from "./DataTypes";
+
 export function hasEmptyFields(formData: FormData): boolean {
     return !formData.get('username') || !formData.get('password');
 }
@@ -68,7 +70,7 @@ export async function supportsBluetooth() {
 }
 
 export async function uploadMeasurement(measurement: object) {
-    const response = await fetch('http://localhost:8000/measurements/', {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/measurements/`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json', 
@@ -95,7 +97,7 @@ export async function uploadMeasurement(measurement: object) {
 }
 
 export async function uploadFatigueData(fatigueData: object) {
-    const response = await fetch('http://localhost:8000/fatiguedata/', {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/fatiguedata/`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json', 
@@ -170,4 +172,61 @@ export function isEqualObject(
     }
 
     return true;
+}
+
+export function downloadAsCSV(
+    measurementObject: MeasurementResponseData, 
+    fatigueDataObject: FatigueResponseData
+) {
+    if (!measurementObject || !fatigueDataObject) return false;
+    const [ measurementCSV, fatigueDataCSV ] = jsonToCSV(measurementObject, fatigueDataObject);
+
+    let measurementBlob = new Blob([measurementCSV], { type: 'text/csv' });
+    let measurementURL = window.URL.createObjectURL(measurementBlob);
+    let aM = document.createElement('a');
+    aM.href = measurementURL;
+    aM.download = 'Measurement_Data.csv';
+    document.body.appendChild(aM);
+    aM.click();
+
+    let fatigueDataBlob = new Blob([fatigueDataCSV], { type: 'text/csv' });
+    let fatigueDataURL = window.URL.createObjectURL(fatigueDataBlob);
+    let aF = document.createElement('a');
+    aF.href = fatigueDataURL;
+    aF.download = 'Fatigue_Data.csv';
+    document.body.appendChild(aF);
+    aF.click();
+
+    document.body.removeChild(aM);
+    document.body.removeChild(aF);
+    URL.revokeObjectURL(measurementURL);
+    URL.revokeObjectURL(fatigueDataURL);
+
+    return true;
+}
+
+function jsonToCSV(
+    measurementObject: MeasurementResponseData, 
+    fatigueDataObject: FatigueResponseData
+) {
+    let measurementCSV = '';
+    let fatigueDataCSV = '';
+
+    const measurementHeaders = Object.keys(measurementObject.data[0]);
+    measurementCSV += measurementHeaders.join(',') + '\n';
+
+    measurementObject.data.forEach(row => {
+        const data = measurementHeaders.map(header => row[header as keyof MeasurementData]).join(',');
+        measurementCSV += data + '\n';
+    });
+
+    const fatigueDataHeaders = Object.keys(fatigueDataObject.data[0]);
+    fatigueDataCSV += fatigueDataHeaders.join(',') + '\n';
+
+    fatigueDataObject.data.forEach(row => {
+        const data = fatigueDataHeaders.map(header => row[header as keyof FatigueData]).join(',');
+        fatigueDataCSV += data + '\n';
+    });
+
+    return [measurementCSV, fatigueDataCSV]
 }

@@ -19,15 +19,9 @@ import { UserData } from "../modules/DataTypes";
 import { supportsBluetooth } from "@/app/modules/UtilityModules";
 import clsx from 'clsx';
 
-const defaultUserDisplay: UserData = {
-  name: '',
-  birthday: new Date(),
-  is_female: false
-}
-
 const page = () => {
   const [activeTab, setActiveTab] = useState(Tabs.DASHBOARD);
-  const [userData, setUserData] = useState(defaultUserDisplay);
+  const [userData, setUserData] = useState<UserData>({name: '', birthday: new Date(), is_female: false});
   const [training, setTraining] = useState(false);
   const [isLoading, setLoading] = useState(true);
   const [logOutConfirm, setLogOutConfirm] = useState(false);
