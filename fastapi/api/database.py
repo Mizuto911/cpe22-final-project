@@ -5,7 +5,7 @@ from dotenv import load_dotenv
 import os
 
 load_dotenv()
-SQL_ALCHEMY_DATABASE_URL = os.getenv('POSTGRESQL_URL')
+SQL_ALCHEMY_DATABASE_URL = os.getenv('SQLITE_URL')
 
 engine = create_engine(SQL_ALCHEMY_DATABASE_URL)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
