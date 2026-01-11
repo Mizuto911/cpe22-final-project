@@ -1,6 +1,6 @@
 # Vital Sphere : IoT Health & Activity Dashboard for Students
-
 ---
+
 ## Project Overview
 
 This project is an **IoT-based Student Health Monitoring System** designed to support real-time wellness assessment through automated data collection, analysis, and visualization. The system integrates a **web-based front end** and a **FastAPI-powered back end**, enabling efficient monitoring, processing, and presentation of student health data.
