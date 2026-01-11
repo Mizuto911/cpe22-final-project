@@ -12,15 +12,6 @@ The project demonstrates the application of:
 * Python-based backend services
 
 
-## System Architecture
-
-The system follows a **client–server architecture** composed of:
-
-* **Front End** – Web interface for user interaction and data visualization
-* **Back End** – FastAPI service handling data processing and API endpoints
-* **Local Development Environment** – Used for deployment, testing, and validation
-
-
 ## Prerequisites
 
 Before running the system, ensure that the following software and tools are **already installed** on the local machine:
