@@ -160,8 +160,3 @@ All project-specific libraries and dependencies are installed during setup.
 * [ ] Python virtual environment created and activated
 * [ ] Backend dependencies installed
 * [ ] FastAPI server runs successfully
-
-
-
-
-
