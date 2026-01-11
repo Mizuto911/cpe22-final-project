@@ -1,10 +1,6 @@
 # CPE22 Final Project
 
----
-
 **Vital Sphere : IoT Health & Activity Dashboard for Students**
-
----
 
 ## Project Overview
 
@@ -17,7 +13,6 @@ The project demonstrates the application of:
 * API-based system architecture
 * Python-based backend services
 
----
 
 ## System Architecture
 
@@ -27,7 +22,6 @@ The system follows a **client–server architecture** composed of:
 * **Back End** – FastAPI service handling data processing and API endpoints
 * **Local Development Environment** – Used for deployment, testing, and validation
 
----
 
 ## Prerequisites
 
@@ -42,7 +36,6 @@ Before running the system, ensure that the following software and tools are **al
 
 All project-specific libraries and dependencies are installed during setup.
 
----
 
 ## Repository Setup
 
@@ -61,7 +54,6 @@ All project-specific libraries and dependencies are installed during setup.
    git remote add https://github.com/Mizuto911/cpe22-final-project
    ```
 
----
 
 ## Cloning the Repository
 
@@ -73,7 +65,6 @@ All project-specific libraries and dependencies are installed during setup.
 6. Choose a local directory for the project.
 7. Wait for the cloning process to complete.
 
----
 
 ## Front-End Deployment
 
@@ -111,7 +102,6 @@ All project-specific libraries and dependencies are installed during setup.
 
 5. Confirm that the application starts successfully in the browser.
 
----
 
 ## Back-End Deployment
 
@@ -125,7 +115,6 @@ All project-specific libraries and dependencies are installed during setup.
 8. Choose `requirements.txt`.
 9. Wait for the dependencies to finish installing.
 
----
 
 ## Virtual Environment Activation
 
@@ -174,16 +163,6 @@ All project-specific libraries and dependencies are installed during setup.
 * [ ] Backend dependencies installed
 * [ ] FastAPI server runs successfully
 
----
-
-## Notes for Evaluators
-
-* The project is intended for **local development deployment**.
-* Separate terminals are recommended for front-end and back-end execution.
-* The Python virtual environment must be activated before running backend commands.
-* Either `npm` or `pnpm` may be used, but should not be mixed.
-
----
 
 ## Authors
 
