@@ -151,11 +151,4 @@ All project-specific libraries and dependencies are installed during setup.
 
 
 
-## Verification Checklist (For Grading)
 
-* [ ] Repository successfully cloned
-* [ ] Front-end dependencies installed
-* [ ] Front-end runs without errors
-* [ ] Python virtual environment created and activated
-* [ ] Backend dependencies installed
-* [ ] FastAPI server runs successfully
