@@ -152,7 +152,7 @@ All project-specific libraries and dependencies are installed during setup.
 
 4. Verify that the API runs without errors.
 
----
+
 
 ## Verification Checklist (For Grading)
 
@@ -162,6 +162,7 @@ All project-specific libraries and dependencies are installed during setup.
 * [ ] Python virtual environment created and activated
 * [ ] Backend dependencies installed
 * [ ] FastAPI server runs successfully
+
 
 
 ## Authors
