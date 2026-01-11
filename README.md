@@ -127,7 +127,6 @@ All project-specific libraries and dependencies are installed during setup.
 
 3. Ensure the virtual environment is active before continuing.
 
----
 
 ## Running the Backend API
 
@@ -164,9 +163,5 @@ All project-specific libraries and dependencies are installed during setup.
 
 
 
-## Authors
-
-**CPE4B Students**
-Laguna State Polytechnic University
 
 
