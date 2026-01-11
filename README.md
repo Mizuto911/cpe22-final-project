@@ -1,6 +1,10 @@
 # CPE22 Final Project
 
+---
+
 **Vital Sphere : IoT Health & Activity Dashboard for Students**
+
+---
 
 ## Project Overview
 
